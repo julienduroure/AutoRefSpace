@@ -67,7 +67,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		txt = ""
 		for limb in limbs:
 			cpt = 1
-			txt = txt + limb.id + "_items = [\n"
+			txt = txt + "items_" + limb.id + " = [\n"
 			for bone in limb.ref_bones:
 				txt = txt + "(\"" + bone.label + "\",\"" + bone.label + "\",\"\"," + str(cpt) + "),\n"
 				cpt = cpt + 1
@@ -78,7 +78,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		txt = ""
 		for limb in limbs:
 			txt = txt + "\tif context.active_pose_bone.name == \"" + limb.bone + "\":\n"
-			txt = txt + "\t\treturn " + limb.id + "_items\n"
+			txt = txt + "\t\treturn items_" + limb.id + "\n"
 			
 		ui_generated_text_ = ui_generated_text_.replace("###ITEM_CHOICE###", txt )
 		
