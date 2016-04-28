@@ -110,7 +110,11 @@ class POSE_OT_juar_limb_remove(bpy.types.Operator):
 	
 	@classmethod
 	def poll(self, context):
-		return context.active_object and context.active_object.type == "ARMATURE"
+		if context.active_object and context.active_object.type == "ARMATURE" and context.active_object.juar_active_limb >= 0:
+			try:
+				return context.active_object.juar_limbs[context.active_object.juar_active_limb].active == False
+			except:
+				return False
 				
 	def execute(self, context):
 		armature = context.object   
