@@ -1,20 +1,20 @@
 ##########################################################################################
 #	GPL LICENSE:
 #-------------------------
-# This file is part of AutoRef.
+# This file is part of AutoRefSpace.
 #
-#    AutoRef is free software: you can redistribute it and/or modify
+#    AutoRefSpace is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 #
-#    AutoRef is distributed in the hope that it will be useful,
+#    AutoRefSpace is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with AutoRef.  If not, see <http://www.gnu.org/licenses/>.
+#    along with AutoRefSpace.  If not, see <http://www.gnu.org/licenses/>.
 ##########################################################################################
 #
 #	Copyright 2016 Julien Duroure (contact@julienduroure.com)
@@ -47,7 +47,7 @@ def cb_enum_update(self, context):
 		if found == True:
 			break
 	
-def cb_active_autoref(self, context):
+def cb_active_AutoRefSpace(self, context):
 	armature = context.object
 	limb = armature.juar_limbs[armature.juar_active_limb]
 	
@@ -64,7 +64,7 @@ def cb_active_autoref(self, context):
 			childof = armature.pose.bones[limb.bone].constraints.new(type='CHILD_OF')
 			childof.target = armature
 			childof.subtarget = bone.name
-			name = "AutoRef " + bone.name
+			name = "AutoRefSpace " + bone.name
 			childof.name = name
 			C = bpy.context.copy()
 			C["constraint"] = childof
@@ -109,7 +109,7 @@ class BoneItem(bpy.types.PropertyGroup):
 class LimbItem(bpy.types.PropertyGroup):
 
 	name = bpy.props.StringProperty(name="Limb Name")
-	active = bpy.props.BoolProperty(name="Active", update=cb_active_autoref)
+	active = bpy.props.BoolProperty(name="Active", update=cb_active_AutoRefSpace)
 	
 	bone = bpy.props.StringProperty(name="Bone")
 	parent = bpy.props.StringProperty(name="Parent")

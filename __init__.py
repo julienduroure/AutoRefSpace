@@ -1,20 +1,20 @@
 ##########################################################################################
 #	GPL LICENSE:
 #-------------------------
-# This file is part of AutoRef.
+# This file is part of AutoRefSpace.
 #
-#    AutoRef is free software: you can redistribute it and/or modify
+#    AutoRefSpace is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 #
-#    AutoRef is distributed in the hope that it will be useful,
+#    AutoRefSpace is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with AutoRef.  If not, see <http://www.gnu.org/licenses/>.
+#    along with AutoRefSpace.  If not, see <http://www.gnu.org/licenses/>.
 ##########################################################################################
 #
 #	Copyright 2016 Julien Duroure (contact@julienduroure.com)
@@ -22,14 +22,14 @@
 ##########################################################################################
 
 bl_info = {
-	"name": "AutoRef",
+	"name": "AutoRefSpace",
 	"author": "Julien Duroure",
 	"version": (0, 0, 1),
 	"blender": (2,77, 0),
 	"description": "Add Ref to your Bones",
-	"location": "View 3D tools, tab 'AutoRef'",
-	"wiki_url": "http://julienduroure.com/AutoRef",
-	"tracker_url": "https://github.com/julienduroure/AutoRef",
+	"location": "View 3D tools, tab 'AutoRefSpace'",
+	"wiki_url": "http://julienduroure.com/AutoRefSpace",
+	"tracker_url": "https://github.com/julienduroure/AutoRefSpace",
 	"category": "Rigging",   
 	"warning": "This is an Alpha Version. Please report bugs :)",
 }
