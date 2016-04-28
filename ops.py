@@ -42,7 +42,11 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		limbs = armature.juar_limbs
 		
 		for limb in limbs:
-			limb.active = True
+			for bone in limb.ref_bones:
+				armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = False
+			bpy.ops.object.mode_set(mode='EDIT')
+			armature.data.edit_bones[limb.bone].parent = None
+			bpy.ops.object.mode_set(mode='POSE')
 		
 		if context.active_object.juar_generation.panel_name == "":
 			context.active_object.juar_generation.panel_name = "test" #addonpref().panel_name #TODO
@@ -86,6 +90,35 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		text.use_module = True
 		text.write(ui_generated_text_)
 		exec(text.as_string(), {})
+			
+		txt = "import bpy\n"
+		for limb in limbs:
+			txt = txt + "def driver_" + limb.id + "(label, enum):\n"
+			txt = txt + "\treturn label == enum\n"
+			txt = txt + "bpy.app.driver_namespace[\"driver_" + limb.id + "\"] =  driver_" + limb.id + "\n"
+			
+		if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py" in bpy.data.texts.keys():
+			bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py"])
+		text = bpy.data.texts.new(name=context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py")
+		text.use_module = True
+		text.write(txt)
+		exec(text.as_string(), {})		
+		
+		#add drivers
+		for limb in limbs:
+			cpt_enum = 1
+			for bone in limb.ref_bones:
+				fcurve = armature.pose.bones[limb.bone].constraints[cpt_enum-1].driver_add('influence')
+				drv = fcurve.driver
+				drv.type = 'SCRIPTED'
+				drv.expression = "driver_" + limb.id + "(" + str(cpt_enum) + ", enum)"
+				var = drv.variables.new()
+				var.name = 'enum'
+				var.type = 'SINGLE_PROP'
+				targ = var.targets[0]
+				targ.id = armature
+				targ.data_path = "pose.bones[\"" + limb.bone + "\"].autorefspace_enum"
+				cpt_enum = cpt_enum + 1
 		
 		#TODO : delete limb
 		#TODO : set default value
