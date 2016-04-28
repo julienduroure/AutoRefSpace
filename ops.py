@@ -120,8 +120,13 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 				targ.data_path = "pose.bones[\"" + limb.bone + "\"].autorefspace_enum"
 				cpt_enum = cpt_enum + 1
 		
+		for limb in limbs:
+			armature.data.bones.active = armature.data.bones[limb.bone]
+			armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[limb.active_ref_bone].label
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.object.mode_set(mode='POSE')
+		
 		#TODO : delete limb
-		#TODO : set default value
 		
 		return {'FINISHED'}
 
