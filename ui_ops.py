@@ -118,6 +118,14 @@ class POSE_OT_juar_limb_remove(bpy.types.Operator):
 				
 	def execute(self, context):
 		armature = context.object   
+		limb = armature.juar_limbs[armature.juar_active_limb]
+		
+		for bone in limb.ref_bones:
+			if limb.bone != "" and armature.pose.bones[limb.bone].constraints.get(bone.constraint):
+				C = bpy.context.copy()
+				C["constraint"] = armature.pose.bones[limb.bone].constraints.get(bone.constraint)
+				bpy.ops.constraint.delete(C)
+				bone.constraint = ""
 		
 		armature.juar_limbs.remove(armature.juar_active_limb)
 		len_ = len(armature.juar_limbs)

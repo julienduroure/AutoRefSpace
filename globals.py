@@ -61,19 +61,22 @@ def cb_active_AutoRefSpace(self, context):
 		armature.data.bones[limb.bone].select = True
 		armature.data.bones.active = armature.data.bones[limb.bone]
 		for bone in limb.ref_bones:
-			childof = armature.pose.bones[limb.bone].constraints.new(type='CHILD_OF')
-			childof.target = armature
-			childof.subtarget = bone.name
-			name = "AutoRefSpace " + bone.name
-			childof.name = name
-			C = bpy.context.copy()
-			C["constraint"] = childof
-			tab_size = len(armature.pose.bones[bone.name].constraints)
-			for i in range(1, tab_size):
-				bpy.ops.constraint.move_up(C, constraint=childof.name,owner='BONE')
-			bpy.ops.constraint.childof_set_inverse(C, constraint=childof.name, owner='BONE')
-			childof.influence = 0.0
-			bone.constraint = childof.name
+			if armature.pose.bones[limb.bone].constraints.get(bone.constraint):
+				armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = False
+			else:
+				childof = armature.pose.bones[limb.bone].constraints.new(type='CHILD_OF')
+				childof.target = armature
+				childof.subtarget = bone.name
+				name = "AutoRefSpace " + bone.name
+				childof.name = name
+				C = bpy.context.copy()
+				C["constraint"] = childof
+				tab_size = len(armature.pose.bones[bone.name].constraints)
+				for i in range(1, tab_size):
+					bpy.ops.constraint.move_up(C, constraint=childof.name,owner='BONE')
+				bpy.ops.constraint.childof_set_inverse(C, constraint=childof.name, owner='BONE')
+				childof.influence = 0.0
+				bone.constraint = childof.name
 			
 		for constr in armature.pose.bones[limb.bone].constraints:
 			constr.influence = 0.0
@@ -95,10 +98,7 @@ def cb_active_AutoRefSpace(self, context):
 		bpy.ops.object.mode_set(mode='POSE')
 		
 		for bone in limb.ref_bones:
-			C = bpy.context.copy()
-			C["constraint"] = armature.pose.bones[limb.bone].constraints.get(bone.constraint)
-			bpy.ops.constraint.delete(C)
-			bone.constraint = ""
+			armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = True
 		
 
 class BoneItem(bpy.types.PropertyGroup):
