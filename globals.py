@@ -121,6 +121,16 @@ class LimbItem(bpy.types.PropertyGroup):
 	
 	id = bpy.props.StringProperty(name="Id")
 	
+view_location_items = [
+	("TOOLS", "Tools", "", 1),
+	("UI", "Properties", "", 2),
+]	
+	
+class JuAR_Generation(bpy.types.PropertyGroup):
+	view_location = bpy.props.EnumProperty(name="View location", items=view_location_items, default="TOOLS")
+	panel_name    = bpy.props.StringProperty(name="Panel name")
+	tab_tool      = bpy.props.StringProperty(name="Tab")
+	
 #shortcut to prefs
 def addonpref():
 	user_preferences = bpy.context.user_preferences
@@ -128,8 +138,10 @@ def addonpref():
 	
 def register():
 	bpy.utils.register_class(BoneItem)
-	bpy.utils.register_class(LimbItem)	
+	bpy.utils.register_class(LimbItem)
+	bpy.utils.register_class(JuAR_Generation)
 
 def unregister():
 	bpy.utils.unregister_class(BoneItem)
 	bpy.utils.unregister_class(LimbItem)
+	bpy.utils.unregister_class(JuAR_Generation)

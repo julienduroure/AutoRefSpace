@@ -61,6 +61,7 @@ def register():
 	ui_ops.register()
 	ui.register()
 	
+	bpy.types.Object.juar_generation = bpy.props.PointerProperty(type=JuAR_Generation)
 	bpy.types.Object.juar_limbs = bpy.props.CollectionProperty(type=LimbItem)
 	bpy.types.Object.juar_active_limb = bpy.props.IntProperty()
 	

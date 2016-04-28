@@ -153,6 +153,30 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 			row = layout.row()
 			row.prop(limb, "enum", text="Ref")
 			
+class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
+	bl_label = "Generate"
+	bl_space_type = 'VIEW_3D'
+	bl_region_type = 'TOOLS'
+	bl_category = "AutoRefSpace"	
+	
+	@classmethod
+	def poll(self, context):
+		armature = context.active_object
+		return armature and armature.type == "ARMATURE" and len(armature.juar_limbs) > 0 and context.mode == 'POSE'
+		
+	def draw(self, context):
+		layout = self.layout
+		armature = context.object
+		row = layout.row()
+		row.prop(armature.juar_generation, "view_location")
+		row = layout.row()
+		row.prop(armature.juar_generation, "panel_name")
+		if armature.juar_generation.view_location == "TOOLS":
+			row = layout.row()
+			row.prop(armature.juar_generation, "tab_tool")
+		row = layout.row()
+		row.operator("pose.juas_generate_refspace", text="Generate")
+			
 def register():
 	bpy.utils.register_class(POSE_UL_juar_LimbList)
 	bpy.utils.register_class(POSE_UL_juar_BoneList)
@@ -160,6 +184,7 @@ def register():
 	bpy.utils.register_class(POSE_PT_juar_AutoRefSpace_Limbs)
 	bpy.utils.register_class(POSE_PT_juar_LimbDetail)
 	bpy.utils.register_class(POSE_PT_juar_LiveAutoRefSpace)
+	bpy.utils.register_class(POSE_PT_juar_LimbGenerate)
 	
 def unregister():
 	bpy.utils.unregister_class(POSE_UL_juar_LimbList)
@@ -168,3 +193,4 @@ def unregister():
 	bpy.utils.unregister_class(POSE_PT_juar_AutoRefSpace_Limbs)
 	bpy.utils.unregister_class(POSE_PT_juar_LimbDetail)
 	bpy.utils.unregister_class(POSE_PT_juar_LiveAutoRefSpace)
+	bpy.utils.unregister_class(POSE_PT_juar_LimbGenerate)
