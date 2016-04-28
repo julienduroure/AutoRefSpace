@@ -119,6 +119,8 @@ class LimbItem(bpy.types.PropertyGroup):
 	
 	enum = bpy.props.EnumProperty(name = 'enum', items=cb_enum_items, update=cb_enum_update)
 	
+	id = bpy.props.StringProperty(name="Id")
+	
 #shortcut to prefs
 def addonpref():
 	user_preferences = bpy.context.user_preferences

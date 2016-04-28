@@ -22,6 +22,7 @@
 ##########################################################################################
 
 import bpy
+import uuid
 
 from .globals import *
 from .utils import *
@@ -97,6 +98,7 @@ class POSE_OT_juar_limb_add(bpy.types.Operator):
 		
 		limb = armature.juar_limbs.add()
 		limb.name = "Limb.%d" % len(armature.juar_limbs)
+		limb.id = uuid.uuid4().hex
 		
 		armature.juar_active_limb = len(armature.juar_limbs) - 1
 		
