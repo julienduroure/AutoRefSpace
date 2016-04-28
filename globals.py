@@ -60,6 +60,7 @@ def cb_active_AutoRefSpace(self, context):
 		bpy.ops.pose.select_all(action='DESELECT')
 		armature.data.bones[limb.bone].select = True
 		armature.data.bones.active = armature.data.bones[limb.bone]
+		cpt = 1
 		for bone in limb.ref_bones:
 			if armature.pose.bones[limb.bone].constraints.get(bone.constraint):
 				armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = False
@@ -71,12 +72,13 @@ def cb_active_AutoRefSpace(self, context):
 				childof.name = name
 				C = bpy.context.copy()
 				C["constraint"] = childof
-				tab_size = len(armature.pose.bones[bone.name].constraints)
-				for i in range(1, tab_size):
+				tab_size = len(armature.pose.bones[limb.bone].constraints)
+				for i in range(cpt, tab_size):
 					bpy.ops.constraint.move_up(C, constraint=childof.name,owner='BONE')
 				bpy.ops.constraint.childof_set_inverse(C, constraint=childof.name, owner='BONE')
 				childof.influence = 0.0
 				bone.constraint = childof.name
+			cpt = cpt + 1
 			
 		for constr in armature.pose.bones[limb.bone].constraints:
 			constr.influence = 0.0
