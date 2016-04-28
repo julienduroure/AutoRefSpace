@@ -144,6 +144,10 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 		
 		row = layout.row()
 		row.prop(limb, "active", toggle=True)
+		if limb.bone == "":
+			row.enabled = False
+		if len(limb.ref_bones) == 0:
+			row.enabled = False
 		
 		if limb.active == True:
 			row = layout.row()
