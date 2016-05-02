@@ -144,6 +144,17 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 		armature = context.object
 		limb = armature.juar_limbs[armature.juar_active_limb]
 		
+		#Check duplicates
+		duplicate = False
+		names = {}
+		if limb.bone != "":
+			names[limb.bone] = limb.bone
+		for limb_ in armature.juar_limbs:
+			if limb_.bone in names.keys() and limb_.id != limb.id:
+				duplicate = True
+				break
+		del names
+		
 		row = layout.row()
 		row.prop(limb, "active", toggle=True)
 		#Do NOT let active for any of following cases : 
@@ -156,6 +167,13 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 		#Already generated
 		if limb.generated == True:
 			row.enabled = False
+			row = layout.row()
+			row.label("Already generated", icon='ERROR')
+		#Duplicates
+		if duplicate == True:
+			row.enabled = False
+			row = layout.row()
+			row.label("Duplicate", icon='ERROR')
 		
 		if limb.active == True:
 			row = layout.row()
