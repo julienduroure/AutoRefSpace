@@ -196,6 +196,8 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 	
 		#Check duplicates
 		duplicate = False
+		some_empty_bone = False
+		some_empty_refs = False
 		names = {}
 		for limb_ in armature.juar_limbs:
 			if limb_.bone in names.keys():
@@ -203,8 +205,11 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 				break
 			else:
 				names[limb_.bone] = limb_.bone
+			if limb_.bone == "":
+				some_empty_bone = True
+			if len(limb_.ref_bones) == 0:
+				some_empty_refs = True
 		del names
-	
 
 		row = layout.row()
 		row.prop(armature.juar_generation, "view_location")
@@ -215,12 +220,17 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 			row.prop(armature.juar_generation, "tab_tool")
 		row = layout.row()
 		row.operator("pose.juas_generate_refspace", text="Generate")
-		if duplicate == True:
+		if duplicate == True or some_empty_bone == True or some_empty_refs == True:
 			row.enabled = False
+		if duplicate == True:
 			row = layout.row()
 			row.label("Duplicate", icon='ERROR')
-		
-		
+		if some_empty_bone == True:
+			row = layout.row()
+			row.label("Some bones are not filled", icon='ERROR')
+		if some_empty_refs == True:
+			row = layout.row()
+			row.label("Some Refs are not filled", icon='ERROR')
 			
 def register():
 	bpy.utils.register_class(POSE_UL_juar_LimbList)
