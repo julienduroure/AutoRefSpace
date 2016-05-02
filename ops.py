@@ -111,7 +111,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		exec(text.as_string(), {})
 			
 		#Create driver file
-		txt = "import bpy\n"
+		txt = driver_generated_text
 		for limb in limbs:
 			txt = txt + "def driver_" + limb.id + "(label, enum):\n"
 			txt = txt + "\treturn label == enum\n"
