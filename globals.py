@@ -58,7 +58,7 @@ def cb_active_AutoRefSpace(self, context):
 		armature.data.edit_bones[limb.bone].parent = None
 		bpy.ops.object.mode_set(mode='POSE')
 		
-		#Select and active bone : TODO : not sure this is needed, because context will be override
+		#Select and active bone, needed for set_inverse
 		bpy.ops.pose.select_all(action='DESELECT')
 		armature.data.bones[limb.bone].select = True
 		armature.data.bones.active = armature.data.bones[limb.bone]
