@@ -42,8 +42,14 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		limbs = armature.juar_limbs
 		
 		for limb in limbs:
+			#Do not generate already generated limbs
+			if limb.generated == True:
+				continue
+			#Enable constraints
+			#TODO : if this bone was never active : create constraints
 			for bone in limb.ref_bones:
 				armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = False
+			#Delete parent
 			bpy.ops.object.mode_set(mode='EDIT')
 			armature.data.edit_bones[limb.bone].parent = None
 			bpy.ops.object.mode_set(mode='POSE')
@@ -64,6 +70,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		ui_generated_text_ = ui_generated_text_.replace("###CATEGORY###", context.active_object.juar_generation.tab_tool)
 		ui_generated_text_ = ui_generated_text_.replace("###rig_id###", rig_id )
 		
+		#Create item lists
 		txt = ""
 		for limb in limbs:
 			cpt = 1
@@ -75,6 +82,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 			
 		ui_generated_text_ = ui_generated_text_.replace("###ITEM_LISTS###", txt )
 		
+		#Create call back for choice of items
 		txt = ""
 		for limb in limbs:
 			txt = txt + "\tif context.active_pose_bone.name == \"" + limb.bone + "\":\n"
@@ -84,6 +92,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		
 		ui_generated_text_ = ui_generated_text_.replace("###REFSPACE_TAB###", str([limb.bone for limb in limbs]))
 		
+		#Create UI file
 		if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py" in bpy.data.texts.keys():
 			bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py"])
 		text = bpy.data.texts.new(name=context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py")
@@ -91,6 +100,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		text.write(ui_generated_text_)
 		exec(text.as_string(), {})
 			
+		#Create driver file
 		txt = "import bpy\n"
 		for limb in limbs:
 			txt = txt + "def driver_" + limb.id + "(label, enum):\n"
@@ -106,6 +116,8 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		
 		#add drivers
 		for limb in limbs:
+			if limb.generated == True:
+				continue
 			cpt_enum = 1
 			for bone in limb.ref_bones:
 				fcurve = armature.pose.bones[limb.bone].constraints[cpt_enum-1].driver_add('influence')
@@ -121,12 +133,18 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 				cpt_enum = cpt_enum + 1
 		
 		for limb in limbs:
+			if limb.generated == True:
+				continue
+			#Set default value
 			armature.data.bones.active = armature.data.bones[limb.bone]
 			armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[limb.active_ref_bone].label
+			
+			#Set generate flag
+			limb.generated = True
+			
 		bpy.ops.object.mode_set(mode='EDIT')
 		bpy.ops.object.mode_set(mode='POSE')
 		
-		#TODO : delete limb
 		
 		return {'FINISHED'}
 

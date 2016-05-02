@@ -52,24 +52,31 @@ def cb_active_AutoRefSpace(self, context):
 	limb = armature.juar_limbs[armature.juar_active_limb]
 	
 	if limb.active == True:
+		#Store Parent
 		bpy.ops.object.mode_set(mode='EDIT')
 		limb.parent = armature.data.edit_bones[limb.bone].parent.name
 		armature.data.edit_bones[limb.bone].parent = None
 		bpy.ops.object.mode_set(mode='POSE')
 		
+		#Select and active bone : TODO : not sure this is needed, because context will be override
 		bpy.ops.pose.select_all(action='DESELECT')
 		armature.data.bones[limb.bone].select = True
 		armature.data.bones.active = armature.data.bones[limb.bone]
 		cpt = 1
 		for bone in limb.ref_bones:
+			#If constraint already exists
 			if armature.pose.bones[limb.bone].constraints.get(bone.constraint):
 				armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = False
+			#Create constraint
 			else:
+				#Create constraint
 				childof = armature.pose.bones[limb.bone].constraints.new(type='CHILD_OF')
 				childof.target = armature
 				childof.subtarget = bone.name
 				name = "AutoRefSpace " + bone.name
 				childof.name = name
+				
+				#Move to top
 				C = bpy.context.copy()
 				C["constraint"] = childof
 				tab_size = len(armature.pose.bones[limb.bone].constraints)
@@ -80,6 +87,7 @@ def cb_active_AutoRefSpace(self, context):
 				bone.constraint = childof.name
 			cpt = cpt + 1
 			
+		#activate default constraint (by setting influence to 1)
 		for constr in armature.pose.bones[limb.bone].constraints:
 			constr.influence = 0.0
 		for constr in armature.pose.bones[limb.bone].constraints:
@@ -94,11 +102,13 @@ def cb_active_AutoRefSpace(self, context):
 			
 		
 	else:
+		#Reset parent of bone
 		bpy.ops.object.mode_set(mode='EDIT')
 		armature.data.edit_bones[limb.bone].parent = armature.data.edit_bones[limb.parent]
 		limb.parent = ""
 		bpy.ops.object.mode_set(mode='POSE')
 		
+		#Mute all constraints
 		for bone in limb.ref_bones:
 			armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = True
 		
@@ -112,6 +122,7 @@ class LimbItem(bpy.types.PropertyGroup):
 
 	name = bpy.props.StringProperty(name="Limb Name")
 	active = bpy.props.BoolProperty(name="Active", update=cb_active_AutoRefSpace)
+	generated = bpy.props.BoolProperty(name="Generated")
 	
 	bone = bpy.props.StringProperty(name="Bone")
 	parent = bpy.props.StringProperty(name="Parent")
