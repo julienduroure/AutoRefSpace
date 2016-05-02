@@ -88,6 +88,8 @@ class POSE_PT_juar_LimbDetail(bpy.types.Panel):
 		limb = armature.juar_limbs[armature.juar_active_limb]
 		
 		row = layout.row()
+		row.prop(limb, "enum_label", text="Label")
+		row = layout.row()
 		col = row.column()
 		row_ = col.column(align=True)
 		row_.prop_search(limb, "bone", armature.data, "bones", text="Bone")

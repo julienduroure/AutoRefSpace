@@ -92,6 +92,16 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		
 		ui_generated_text_ = ui_generated_text_.replace("###REFSPACE_TAB###", str([limb.bone for limb in limbs]))
 		
+		#Create enum label dict
+		txt = ""
+		for limb in limbs:
+			if limb.enum_label != "":
+				txt = txt + "\"" + limb.bone + "\" : \"" + limb.enum_label + "\",\n"
+			else:
+				txt = txt + "\"" + limb.bone + "\" : \"" + "RefSpace" + "\",\n"
+				
+		ui_generated_text_ = ui_generated_text_.replace("###ENUM_LABELS###", txt)
+		
 		#Create UI file
 		if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py" in bpy.data.texts.keys():
 			bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py"])

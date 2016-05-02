@@ -123,6 +123,7 @@ class LimbItem(bpy.types.PropertyGroup):
 	name = bpy.props.StringProperty(name="Limb Name")
 	active = bpy.props.BoolProperty(name="Active", update=cb_active_AutoRefSpace)
 	generated = bpy.props.BoolProperty(name="Generated")
+	enum_label = bpy.props.StringProperty(name="Enum Label")
 	
 	bone = bpy.props.StringProperty(name="Bone")
 	parent = bpy.props.StringProperty(name="Parent")
