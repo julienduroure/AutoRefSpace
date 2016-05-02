@@ -24,6 +24,7 @@
 import bpy
 
 from .ui_texts import *
+from .globals import *
 import uuid
 
 class POSE_OT_juar_generate_refspace(bpy.types.Operator):
@@ -55,9 +56,9 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 			bpy.ops.object.mode_set(mode='POSE')
 		
 		if context.active_object.juar_generation.panel_name == "":
-			context.active_object.juar_generation.panel_name = "test" #addonpref().panel_name #TODO
+			context.active_object.juar_generation.panel_name =  addonpref().panel_name 
 		if context.active_object.juar_generation.tab_tool == "":
-			context.active_object.juar_generation.tab_tool = "test" # addonpref().tab_tool #TODO
+			context.active_object.juar_generation.tab_tool = addonpref().tab_tool
 		
 		#Add rig_id custom prop if not exists, and assign a random value
 		if context.active_object.data.get('autorefspace_rig_id') is None:

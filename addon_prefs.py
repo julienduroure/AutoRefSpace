@@ -27,10 +27,17 @@ from .globals import *
 
 class JuAR_Preferences(bpy.types.AddonPreferences):
 	bl_idname = __package__
+
+	panel_name = bpy.props.StringProperty(name="Default Panel name", default="RefSpace")
+	tab_tool = bpy.props.StringProperty(name="Default Tab name", default="RefSpace")
+
 	
 	def draw(self, context):
 		layout = self.layout
-		layout.label("No user prefs for now")
+		row = layout.row()
+		layout.prop(self, "panel_name", text="Default Panel Name")
+		row = layout.row()
+		layout.prop(self, "tab_tool", text="Default Tab")
 		
 def register():
 	bpy.utils.register_class(JuAR_Preferences)
