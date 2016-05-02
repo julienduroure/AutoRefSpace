@@ -80,7 +80,7 @@ class POSE_PT_juar_LimbDetail(bpy.types.Panel):
 	@classmethod
 	def poll(self, context):
 		armature = context.active_object
-		return armature and armature.type == "ARMATURE" and len(armature.juar_limbs) > 0 and context.mode == 'POSE' and armature.juar_limbs[armature.juar_active_limb].active == False
+		return armature and armature.type == "ARMATURE" and len(armature.juar_limbs) > 0 and context.mode == 'POSE' and armature.juar_limbs[armature.juar_active_limb].active == False and armature.juar_limbs[armature.juar_active_limb].generated == False
 		
 	def draw(self, context):
 		layout = self.layout
