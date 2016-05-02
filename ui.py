@@ -193,6 +193,19 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 		armature = context.object
+	
+		#Check duplicates
+		duplicate = False
+		names = {}
+		for limb_ in armature.juar_limbs:
+			if limb_.bone in names.keys():
+				duplicate = True
+				break
+			else:
+				names[limb_.bone] = limb_.bone
+		del names
+	
+
 		row = layout.row()
 		row.prop(armature.juar_generation, "view_location")
 		row = layout.row()
@@ -202,6 +215,12 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 			row.prop(armature.juar_generation, "tab_tool")
 		row = layout.row()
 		row.operator("pose.juas_generate_refspace", text="Generate")
+		if duplicate == True:
+			row.enabled = False
+			row = layout.row()
+			row.label("Duplicate", icon='ERROR')
+		
+		
 			
 def register():
 	bpy.utils.register_class(POSE_UL_juar_LimbList)
