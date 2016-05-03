@@ -155,6 +155,7 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 				break
 		del names
 		
+		
 		row = layout.row()
 		row.prop(limb, "active", toggle=True)
 		#Do NOT let active for any of following cases : 
@@ -174,6 +175,11 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 			row.enabled = False
 			row = layout.row()
 			row.label("Duplicate", icon='ERROR')
+		#Bone can't be its own ref
+		if limb.bone in [bone_.name for bone_ in limb.ref_bones]:
+			row.enabled = False
+			row = layout.row()
+			row.label("Bone is its own ref", icon='ERROR')
 		
 		if limb.active == True:
 			row = layout.row()
@@ -195,9 +201,10 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 		armature = context.object
 	
 		#Check duplicates
-		duplicate = False
+		duplicate       = False
 		some_empty_bone = False
 		some_empty_refs = False
+		own_ref         = False
 		names = {}
 		for limb_ in armature.juar_limbs:
 			if limb_.bone in names.keys():
@@ -209,6 +216,8 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 				some_empty_bone = True
 			if len(limb_.ref_bones) == 0:
 				some_empty_refs = True
+			if limb_.bone in [bone_.name for bone_ in limb_.ref_bones]:
+				own_ref = True
 		del names
 
 		row = layout.row()
@@ -220,7 +229,7 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 			row.prop(armature.juar_generation, "tab_tool")
 		row = layout.row()
 		row.operator("pose.juas_generate_refspace", text="Generate")
-		if duplicate == True or some_empty_bone == True or some_empty_refs == True:
+		if duplicate == True or some_empty_bone == True or some_empty_refs == True or own_ref == True:
 			row.enabled = False
 		if duplicate == True:
 			row = layout.row()
@@ -231,6 +240,10 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 		if some_empty_refs == True:
 			row = layout.row()
 			row.label("Some Refs are not filled", icon='ERROR')
+		#Bone can't be its own ref
+		if own_ref == True:
+			row = layout.row()
+			row.label("Some bones are self-ref", icon='ERROR')
 			
 def register():
 	bpy.utils.register_class(POSE_UL_juar_LimbList)
