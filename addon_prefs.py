@@ -29,8 +29,8 @@ class JuAR_Preferences(bpy.types.AddonPreferences):
 	bl_idname = __package__
 
 	panel_name = bpy.props.StringProperty(name="Default Panel name", default="RefSpace")
-	tab_tool = bpy.props.StringProperty(name="Default Tab name", default="RefSpace")
-
+	tab_tool   = bpy.props.StringProperty(name="Default Tab name", default="RefSpace")
+	enum_label = bpy.props.StringProperty(name="Default Enum Label", default="RefSpace")
 	
 	def draw(self, context):
 		layout = self.layout
@@ -38,6 +38,8 @@ class JuAR_Preferences(bpy.types.AddonPreferences):
 		layout.prop(self, "panel_name", text="Default Panel Name")
 		row = layout.row()
 		layout.prop(self, "tab_tool", text="Default Tab")
+		row = layout.row()
+		layout.prop(self, "enum_label", text="Default Enum Label")
 		
 def register():
 	bpy.utils.register_class(JuAR_Preferences)

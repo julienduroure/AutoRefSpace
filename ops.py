@@ -104,7 +104,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 			if limb.enum_label != "":
 				txt = txt + "\"" + limb.bone + "\" : \"" + limb.enum_label + "\",\n"
 			else:
-				txt = txt + "\"" + limb.bone + "\" : \"" + "RefSpace" + "\",\n"
+				txt = txt + "\"" + limb.bone + "\" : \"" + addonpref().enum_label + "\",\n"
 				
 		ui_generated_text_ = ui_generated_text_.replace("###ENUM_LABELS###", txt)
 		
