@@ -46,7 +46,39 @@ def cb_enum_update(self, context):
 				break
 		if found == True:
 			break
+			
+def set_active(bone_name):
+	armature = bpy.context.object
+	bpy.ops.pose.select_all(action='DESELECT')
+	armature.data.bones[bone_name].select = True
+	armature.data.bones.active = armature.data.bones[bone_name]
+
 	
+def create_constraints(limb):
+	armature = bpy.context.object
+	
+	set_active(limb.bone)
+	cpt = 1
+	for bone in limb.ref_bones:
+		#Create constraint
+		childof = armature.pose.bones[limb.bone].constraints.new(type='CHILD_OF')
+		childof.target = armature
+		childof.subtarget = bone.name
+		name = "AutoRefSpace " + bone.name
+		childof.name = name
+				
+		#Move to top
+		C = bpy.context.copy()
+		C["constraint"] = childof
+		tab_size = len(armature.pose.bones[limb.bone].constraints)
+		for i in range(cpt, tab_size):
+			bpy.ops.constraint.move_up(C, constraint=childof.name,owner='BONE')
+		bpy.ops.constraint.childof_set_inverse(C, constraint=childof.name, owner='BONE')
+		childof.influence = 0.0
+		bone.constraint = childof.name
+		
+		cpt = cpt + 1
+			
 def cb_active_AutoRefSpace(self, context):
 	armature = context.object
 	limb = armature.juar_limbs[armature.juar_active_limb]
@@ -58,34 +90,7 @@ def cb_active_AutoRefSpace(self, context):
 		armature.data.edit_bones[limb.bone].parent = None
 		bpy.ops.object.mode_set(mode='POSE')
 		
-		#Select and active bone, needed for set_inverse
-		bpy.ops.pose.select_all(action='DESELECT')
-		armature.data.bones[limb.bone].select = True
-		armature.data.bones.active = armature.data.bones[limb.bone]
-		cpt = 1
-		for bone in limb.ref_bones:
-			#If constraint already exists
-			if armature.pose.bones[limb.bone].constraints.get(bone.constraint):
-				armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = False
-			#Create constraint
-			else:
-				#Create constraint
-				childof = armature.pose.bones[limb.bone].constraints.new(type='CHILD_OF')
-				childof.target = armature
-				childof.subtarget = bone.name
-				name = "AutoRefSpace " + bone.name
-				childof.name = name
-				
-				#Move to top
-				C = bpy.context.copy()
-				C["constraint"] = childof
-				tab_size = len(armature.pose.bones[limb.bone].constraints)
-				for i in range(cpt, tab_size):
-					bpy.ops.constraint.move_up(C, constraint=childof.name,owner='BONE')
-				bpy.ops.constraint.childof_set_inverse(C, constraint=childof.name, owner='BONE')
-				childof.influence = 0.0
-				bone.constraint = childof.name
-			cpt = cpt + 1
+		create_constraints(limb)
 			
 		#activate default constraint (by setting influence to 1)
 		for constr in armature.pose.bones[limb.bone].constraints:
@@ -108,9 +113,13 @@ def cb_active_AutoRefSpace(self, context):
 		limb.parent = ""
 		bpy.ops.object.mode_set(mode='POSE')
 		
-		#Mute all constraints
+		#Delete all constraints
 		for bone in limb.ref_bones:
-			armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = True
+			if limb.bone != "" and armature.pose.bones[limb.bone].constraints.get(bone.constraint):
+				C = bpy.context.copy()
+				C["constraint"] = armature.pose.bones[limb.bone].constraints.get(bone.constraint)
+				bpy.ops.constraint.delete(C)
+				bone.constraint = ""
 		
 
 class BoneItem(bpy.types.PropertyGroup):
