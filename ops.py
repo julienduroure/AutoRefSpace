@@ -46,14 +46,19 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 			#Do not generate already generated limbs
 			if limb.generated == True:
 				continue
-			#Enable constraints
-			#TODO : if this bone was never active : create constraints
-			for bone in limb.ref_bones:
-				armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = False
-			#Delete parent
-			bpy.ops.object.mode_set(mode='EDIT')
-			armature.data.edit_bones[limb.bone].parent = None
-			bpy.ops.object.mode_set(mode='POSE')
+			#Enable constraints or create them
+			if limb.active == True:
+				for bone in limb.ref_bones:
+					armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = False
+			else:
+				#create constraints
+				create_constraints(limb)
+			
+				#Delete parent
+				bpy.ops.object.mode_set(mode='EDIT')
+				limb.parent = armature.data.edit_bones[limb.bone].parent.name
+				armature.data.edit_bones[limb.bone].parent = None
+				bpy.ops.object.mode_set(mode='POSE')
 		
 		if context.active_object.juar_generation.panel_name == "":
 			context.active_object.juar_generation.panel_name =  addonpref().panel_name 
