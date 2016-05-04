@@ -180,7 +180,7 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 			row.enabled = False
 			row = layout.row()
 			row.label("Bone is its own ref", icon='ERROR')
-		if check_child_of_bone(limb.bone) == True:
+		if limb.active == False and check_child_of_bone(limb.bone) == True:
 			row.enabled = False
 			row = layout.row()
 			row.label("Already child of constraint on bone", icon='ERROR')			
@@ -233,7 +233,7 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 			row.prop(armature.juar_generation, "tab_tool")
 		row = layout.row()
 		row.operator("pose.juas_generate_refspace", text="Generate")
-		if duplicate == True or some_empty_bone == True or some_empty_refs == True or own_ref == True or check_child_of_list_bone([limb.bone for limb in armature.juar_limbs]):
+		if duplicate == True or some_empty_bone == True or some_empty_refs == True or own_ref == True or check_child_of_list_bone([limb.bone for limb in armature.juar_limbs if (limb.generated == False and limb.active == False)]):
 			row.enabled = False
 		if duplicate == True:
 			row = layout.row()
@@ -244,7 +244,7 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 		if some_empty_refs == True:
 			row = layout.row()
 			row.label("Some Refs are not filled", icon='ERROR')
-		if check_child_of_list_bone([limb.bone for limb in armature.juar_limbs]) == True:
+		if check_child_of_list_bone([limb.bone for limb in armature.juar_limbs if (limb.generated == False and limb.active == False)]) == True:
 			row = layout.row()
 			row.label("Some bone have already child of constraint", icon='ERROR')			
 		#Bone can't be its own ref
