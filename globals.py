@@ -47,6 +47,19 @@ def cb_enum_update(self, context):
 		if found == True:
 			break
 			
+def check_child_of_list_bone(bones):
+	for bone in bones:
+		if check_child_of_bone(bone) == True:
+			return True
+	return False
+			
+def check_child_of_bone(bone):
+	if bone != "":
+		for constr in bpy.context.object.pose.bones[bone].constraints:
+			if constr.type == "CHILD_OF":
+				return True
+	return False
+			
 def set_active(bone_name):
 	armature = bpy.context.object
 	bpy.ops.pose.select_all(action='DESELECT')
