@@ -56,7 +56,10 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 			
 				#Delete parent
 				bpy.ops.object.mode_set(mode='EDIT')
-				limb.parent = armature.data.edit_bones[limb.bone].parent.name
+				if armature.data.edit_bones[limb.bone].parent:
+					limb.parent = armature.data.edit_bones[limb.bone].parent.name
+				else:
+					limb.parent = ""
 				armature.data.edit_bones[limb.bone].parent = None
 				bpy.ops.object.mode_set(mode='POSE')
 		

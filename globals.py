@@ -86,7 +86,10 @@ def cb_active_AutoRefSpace(self, context):
 	if limb.active == True:
 		#Store Parent
 		bpy.ops.object.mode_set(mode='EDIT')
-		limb.parent = armature.data.edit_bones[limb.bone].parent.name
+		if armature.data.edit_bones[limb.bone].parent:
+			limb.parent = armature.data.edit_bones[limb.bone].parent.name
+		else:
+			limb.parent = ""
 		armature.data.edit_bones[limb.bone].parent = None
 		bpy.ops.object.mode_set(mode='POSE')
 		
@@ -109,7 +112,10 @@ def cb_active_AutoRefSpace(self, context):
 	else:
 		#Reset parent of bone
 		bpy.ops.object.mode_set(mode='EDIT')
-		armature.data.edit_bones[limb.bone].parent = armature.data.edit_bones[limb.parent]
+		if limb.parent != "":
+			armature.data.edit_bones[limb.bone].parent = armature.data.edit_bones[limb.parent]
+		else:
+			armature.data.edit_bones[limb.bone].parent = None
 		limb.parent = ""
 		bpy.ops.object.mode_set(mode='POSE')
 		
