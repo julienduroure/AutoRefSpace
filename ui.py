@@ -168,8 +168,6 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 		#Already generated
 		if limb.generated == True:
 			row.enabled = False
-			row = layout.row()
-			row.label("Already generated", icon='ERROR')
 		#Duplicates
 		if duplicate == True:
 			row.enabled = False
@@ -180,7 +178,7 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 			row.enabled = False
 			row = layout.row()
 			row.label("Bone is its own ref", icon='ERROR')
-		if limb.active == False and check_child_of_bone(limb.bone) == True:
+		if (limb.active == False and limb.generated == False) and check_child_of_bone(limb.bone) == True:
 			row.enabled = False
 			row = layout.row()
 			row.label("Already child of constraint on bone", icon='ERROR')			
@@ -188,6 +186,10 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 		if limb.active == True:
 			row = layout.row()
 			row.prop(limb, "enum", text="Ref")
+		
+		if limb.generated == True:
+			row = layout.row()
+			row.operator("pose.juas_update_refspace", text="Update")
 			
 class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 	bl_label = "Generate"

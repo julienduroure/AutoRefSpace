@@ -166,9 +166,42 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		
 		
 		return {'FINISHED'}
+		
+class POSE_OT_juar_update_refspace(bpy.types.Operator):
+	"""Update RefSpace"""
+	bl_idname = "pose.juas_update_refspace"
+	bl_label = "Update RefSpace"
+	bl_options = {'REGISTER'}
+	
+	
+	@classmethod
+	def poll(self, context):
+		return context.active_object and context.active_object.type == "ARMATURE" and len(context.active_object.juar_limbs) > 0 and context.mode == 'POSE'
+		
+	def execute(self, context):
+		armature = context.active_object
+		limbs = armature.juar_limbs
+		limb  = limbs[armature.juar_active_limb]
+		
+		#delete drivers
+		for bone in limb.ref_bones:
+			armature.pose.bones[limb.bone].constraints.get(bone.constraint).driver_remove('influence')
+		
+		#This will delete constraints
+		limb.active = False
+
+		
+		#Enable live ref space
+		limb.generated = False
+
+		
+		
+		return {'FINISHED'}
 
 def register():
 	bpy.utils.register_class(POSE_OT_juar_generate_refspace)
+	bpy.utils.register_class(POSE_OT_juar_update_refspace)
 	
 def unregister():
 	bpy.utils.unregister_class(POSE_OT_juar_generate_refspace)
+	bpy.utils.unregister_class(POSE_OT_juar_update_refspace)
