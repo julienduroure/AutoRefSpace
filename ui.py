@@ -75,6 +75,7 @@ class POSE_PT_juar_AutoRefSpace_Limbs(bpy.types.Panel):
 		row = col.column(align=True)
 		row.operator("pose.juar_limb_add", icon="ZOOMIN", text="")
 		row.operator("pose.juar_limb_remove", icon="ZOOMOUT", text="")
+		row.menu("POSE_MT_JuAR_limb_specials", icon='DOWNARROW_HLT', text="")
 			
 		if len(context.active_object.juar_limbs) > 0:
 			row = col.column(align=True)
@@ -200,7 +201,7 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 		
 		if limb.generated == True:
 			row = layout.row()
-			row.operator("pose.juas_update_refspace", text="Update")
+			row.operator("pose.juar_update_refspace", text="Update")
 			
 class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 	bl_label = "Generate"
@@ -245,7 +246,7 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 			row = layout.row()
 			row.prop(armature.juar_generation, "tab_tool")
 		row = layout.row()
-		row.operator("pose.juas_generate_refspace", text="Generate")
+		row.operator("pose.juar_generate_refspace", text="Generate")
 		if duplicate == True or some_empty_bone == True or some_empty_refs == True or own_ref == True or check_child_of_list_bone([limb.bone for limb in armature.juar_limbs if (limb.generated == False and limb.active == False)]):
 			row.enabled = False
 		if duplicate == True:
@@ -265,6 +266,17 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 			row = layout.row()
 			row.label("Some bones are self-ref", icon='ERROR')
 		
+class POSE_MT_JuAR_limb_specials(bpy.types.Menu):
+	bl_label = "Limb Specials"
+
+	def draw(self, context):
+		layout = self.layout
+	
+		op = layout.operator("pose.juar_limb_copy", icon='COPY_ID', text="Copy Limb")
+		op.mirror = False
+		op = layout.operator("pose.juar_limb_copy", icon='ARROW_LEFTRIGHT', text="Mirror Copy Limb")
+		op.mirror = True		
+		
 			
 def register():
 	bpy.utils.register_class(POSE_UL_juar_LimbList)
@@ -276,6 +288,8 @@ def register():
 	bpy.utils.register_class(POSE_PT_juar_LiveAutoRefSpace)
 	bpy.utils.register_class(POSE_PT_juar_LimbGenerate)
 	
+	bpy.utils.register_class(POSE_MT_JuAR_limb_specials)
+	
 def unregister():
 	bpy.utils.unregister_class(POSE_UL_juar_LimbList)
 	bpy.utils.unregister_class(POSE_UL_juar_BoneList)
@@ -285,3 +299,5 @@ def unregister():
 	bpy.utils.unregister_class(POSE_PT_juar_LimbDetail)
 	bpy.utils.unregister_class(POSE_PT_juar_LiveAutoRefSpace)
 	bpy.utils.unregister_class(POSE_PT_juar_LimbGenerate)
+	
+	bpy.utils.register_class(POSE_MT_JuAR_limb_specials)

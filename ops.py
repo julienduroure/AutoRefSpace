@@ -25,11 +25,12 @@ import bpy
 
 from .ui_texts import *
 from .globals import *
+from .utils import *
 import uuid
 
 class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 	"""Generate RefSpace"""
-	bl_idname = "pose.juas_generate_refspace"
+	bl_idname = "pose.juar_generate_refspace"
 	bl_label = "Generate RefSpace"
 	bl_options = {'REGISTER'}
 	
@@ -169,7 +170,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		
 class POSE_OT_juar_update_refspace(bpy.types.Operator):
 	"""Update RefSpace"""
-	bl_idname = "pose.juas_update_refspace"
+	bl_idname = "pose.juar_update_refspace"
 	bl_label = "Update RefSpace"
 	bl_options = {'REGISTER'}
 	
@@ -203,11 +204,61 @@ class POSE_OT_juar_update_refspace(bpy.types.Operator):
 		
 		
 		return {'FINISHED'}
+		
+
+class POSE_OT_juar_limb_copy(bpy.types.Operator):
+	"""Copy active limb, with mirror option"""
+	bl_idname = "pose.juar_limb_copy"
+	bl_label = "Copy Limb"
+	bl_options = {'REGISTER'}
+	
+	mirror = bpy.props.BoolProperty(name="Mirror", default=False)
+	
+	@classmethod
+	def poll(self, context):
+		return context.active_object and context.active_object.type == "ARMATURE" and len(context.active_object.juar_limbs) > 0
+				
+	def execute(self, context):
+	
+		if self.mirror == True:
+			fct = get_symm_name
+		else:
+			fct = get_name
+
+		if len(addonpref().sides) == 0:
+			init_sides(context)	
+
+		armature = context.object
+		src_limb_index = armature.juar_active_limb
+		dst_limb = armature.juar_limbs.add()
+		
+		dst_limb.name = fct(armature.juar_limbs[src_limb_index].name)
+		dst_limb.enum_label = armature.juar_limbs[src_limb_index].enum_label
+		dst_limb.bone = fct(armature.juar_limbs[src_limb_index].bone)
+		dst_limb.parent = fct(armature.juar_limbs[src_limb_index].parent)
+		dst_limb.id = uuid.uuid4().hex
+		
+		for src_bone in armature.juar_limbs[src_limb_index].ref_bones:
+			dst_bone = dst_limb.ref_bones.add()
+			dst_bone.name = fct(src_bone.name)
+			dst_bone.label = fct(src_bone.label)
+			dst_bone.constraint = ""
+		dst_limb.active_ref_bone = armature.juar_limbs[src_limb_index].active_ref_bone
+		
+		dst_limb.active = False
+		dst_limb.generated = False
+		
+		armature.juar_active_limb = len(armature.juar_limbs) - 1
+			
+		return {'FINISHED'} 		
+		
 
 def register():
 	bpy.utils.register_class(POSE_OT_juar_generate_refspace)
 	bpy.utils.register_class(POSE_OT_juar_update_refspace)
+	bpy.utils.register_class(POSE_OT_juar_limb_copy)
 	
 def unregister():
 	bpy.utils.unregister_class(POSE_OT_juar_generate_refspace)
 	bpy.utils.unregister_class(POSE_OT_juar_update_refspace)
+	bpy.utils.unregister_class(POSE_OT_juar_limb_copy)
