@@ -186,7 +186,7 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 			row = layout.row()
 			row.label("Duplicate", icon='ERROR')
 		#Bone can't be its own ref
-		if limb.bone in [bone_.name for bone_ in limb.ref_bones]:
+		if limb.bone in [bone_.name for bone_ in limb.ref_bones] and limb.bone != "":
 			row.enabled = False
 			row = layout.row()
 			row.label("Bone is its own ref", icon='ERROR')
@@ -234,7 +234,7 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 				some_empty_bone = True
 			if len(limb_.ref_bones) == 0:
 				some_empty_refs = True
-			if limb_.bone in [bone_.name for bone_ in limb_.ref_bones]:
+			if limb_.bone in [bone_.name for bone_ in limb_.ref_bones] and limb_.bone != "":
 				own_ref = True
 		del names
 
