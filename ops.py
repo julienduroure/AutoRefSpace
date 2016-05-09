@@ -192,17 +192,16 @@ class POSE_OT_juar_update_refspace(bpy.types.Operator):
 		limb.active = False
 		
 		#Delete keyframes on enum
-		curves = bpy.context.active_object.animation_data.action.fcurves
-		for c in curves:
-			if c.data_path.split('.')[len(c.data_path.split('.'))-1] == "autorefspace_enum":
-				bpy.context.active_object.animation_data.action.fcurves.remove(c)
-				break
+		if bpy.context.active_object.animation_data and bpy.context.active_object.animation_data.action:
+			curves = bpy.context.active_object.animation_data.action.fcurves
+			for c in curves:
+				if c.data_path.split('.')[len(c.data_path.split('.'))-1] == "autorefspace_enum":
+					bpy.context.active_object.animation_data.action.fcurves.remove(c)
+					break
 		
 		#Enable live ref space
 		limb.generated = False
 
-		
-		
 		return {'FINISHED'}
 		
 
