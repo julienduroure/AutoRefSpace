@@ -31,8 +31,6 @@ def cb_enum_items(self, context):
 	armature = context.object
 	limb = armature.juar_limbs[armature.juar_active_limb]
 	for bone in limb.ref_bones:
-		if bone.label == "":
-			bone.label = bone.name
 		items.append((bone.label, bone.label, ""))
 	return items
 	
@@ -81,6 +79,12 @@ def cb_active_AutoRefSpace(self, context):
 	limb = armature.juar_limbs[armature.juar_active_limb]
 	
 	if limb.active == True:
+	
+		#Set default label if needed
+		for bone in limb.ref_bones:
+			if bone.label == "":
+				bone.label = bone.name
+				
 		#Store Parent
 		bpy.ops.object.mode_set(mode='EDIT')
 		if armature.data.edit_bones[limb.bone].parent:

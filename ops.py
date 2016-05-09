@@ -47,6 +47,12 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 			#Do not generate already generated limbs
 			if limb.generated == True:
 				continue
+				
+			#Set default label if needed
+			for bone in limb.ref_bones:
+				if bone.label == "":
+					bone.label = bone.name
+				
 			#Enable constraints or create them
 			if limb.active == True:
 				for bone in limb.ref_bones:
