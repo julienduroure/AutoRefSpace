@@ -31,6 +31,8 @@ def cb_enum_items(self, context):
 	armature = context.object
 	limb = armature.juar_limbs[armature.juar_active_limb]
 	for bone in limb.ref_bones:
+		if bone.label == "":
+			bone.label = bone.name
 		items.append((bone.label, bone.label, ""))
 	return items
 	
