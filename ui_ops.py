@@ -96,6 +96,9 @@ class POSE_OT_juar_limb_add(bpy.types.Operator):
 	def execute(self, context):
 		armature = context.object
 		
+		if len(addonpref().sides) == 0:
+			init_sides(context)
+		
 		limb = armature.juar_limbs.add()
 		limb.name = "Limb.%d" % len(armature.juar_limbs)
 		limb.id = uuid.uuid4().hex
