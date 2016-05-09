@@ -31,7 +31,8 @@ def cb_enum_items(self, context):
 	armature = context.object
 	limb = armature.juar_limbs[armature.juar_active_limb]
 	for bone in limb.ref_bones:
-		items.append((bone.label, bone.label, ""))
+		if bone.name != "":
+			items.append((bone.label, bone.label, ""))
 	return items
 	
 def cb_enum_update(self, context):
@@ -55,6 +56,9 @@ def create_constraints(limb):
 	set_active(limb.bone)
 	cpt = 1
 	for bone in limb.ref_bones:
+		if bone.name == "":
+			continue
+			
 		#Create constraint
 		childof = armature.pose.bones[limb.bone].constraints.new(type='CHILD_OF')
 		childof.target = armature
@@ -122,6 +126,8 @@ def cb_active_AutoRefSpace(self, context):
 		
 		#Delete all constraints
 		for bone in limb.ref_bones:
+			if bone.name == "":
+				continue
 			if limb.bone != "" and armature.pose.bones[limb.bone].constraints.get(bone.constraint):
 				C = bpy.context.copy()
 				C["constraint"] = armature.pose.bones[limb.bone].constraints.get(bone.constraint)

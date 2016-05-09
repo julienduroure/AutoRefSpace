@@ -56,6 +56,8 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 			#Enable constraints or create them
 			if limb.active == True:
 				for bone in limb.ref_bones:
+					if bone.name == "":
+						continue
 					armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = False
 			else:
 				#create constraints
@@ -92,6 +94,8 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 			cpt = 1
 			txt = txt + "items_" + limb.id + " = [\n"
 			for bone in limb.ref_bones:
+				if bone.name == "":
+					continue
 				txt = txt + "(\"" + bone.label + "\",\"" + bone.label + "\",\"\"," + str(cpt) + "),\n"
 				cpt = cpt + 1
 			txt = txt + "]\n"
@@ -146,6 +150,8 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 				continue
 			cpt_enum = 1
 			for bone in limb.ref_bones:
+				if bone.name == "":
+					continue
 				fcurve = armature.pose.bones[limb.bone].constraints[cpt_enum-1].driver_add('influence')
 				drv = fcurve.driver
 				drv.type = 'SCRIPTED'
@@ -163,7 +169,13 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 				continue
 			#Set default value
 			armature.data.bones.active = armature.data.bones[limb.bone]
-			armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[limb.active_ref_bone].label
+			if limb.ref_bones[limb.active_ref_bone].label != "":
+				armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[limb.active_ref_bone].label
+			else:
+				for i in range(len(limb.ref_bones)):
+					if limb.ref_bones[i].label != "":
+						armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[i].label
+						break
 			
 			#Set generate flag
 			limb.generated = True
@@ -192,6 +204,8 @@ class POSE_OT_juar_update_refspace(bpy.types.Operator):
 		
 		#delete drivers
 		for bone in limb.ref_bones:
+			if bone.name == "":
+				continue
 			armature.pose.bones[limb.bone].constraints.get(bone.constraint).driver_remove('influence')
 		
 		#This will delete constraints

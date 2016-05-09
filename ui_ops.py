@@ -126,6 +126,8 @@ class POSE_OT_juar_limb_remove(bpy.types.Operator):
 		limb = armature.juar_limbs[armature.juar_active_limb]
 		
 		for bone in limb.ref_bones:
+			if bone.name == "":
+				continue
 			if limb.bone != "" and armature.pose.bones[limb.bone].constraints.get(bone.constraint):
 				C = bpy.context.copy()
 				C["constraint"] = armature.pose.bones[limb.bone].constraints.get(bone.constraint)
