@@ -236,6 +236,85 @@ class POSE_OT_juar_limb_select_bone_from_selection(bpy.types.Operator):
 
 		return {'FINISHED'}  
 		
+class POSE_OT_juar_side_move(bpy.types.Operator):
+	"""Move Side up or down in the list"""
+	bl_idname = "pose.juar_side_move"
+	bl_label = "Move Side"
+	bl_options = {'REGISTER'}
+	
+	direction = bpy.props.StringProperty()
+
+	@classmethod
+	def poll(self, context):
+		return context.active_object and context.active_object.type == "ARMATURE" and len(addonpref().sides) > 0
+		
+	def execute(self, context):
+		index   = addonpref().active_side
+		
+		if self.direction == "UP":
+			new_index = index - 1
+		elif self.direction == "DOWN":
+			new_index = index + 1
+		else:
+			new_index = index
+			
+		if new_index < len(addonpref().sides) and new_index >= 0:
+			addonpref().sides.move(index, new_index)
+			addonpref().active_side = new_index
+		
+		return {'FINISHED'}
+		
+class POSE_OT_juar_side_add(bpy.types.Operator):
+	"""Add a new Side"""
+	bl_idname = "pose.juar_side_add"
+	bl_label = "Add Side"
+	bl_options = {'REGISTER'}
+	
+	@classmethod
+	def poll(self, context):
+		return context.active_object and context.active_object.type == "ARMATURE"
+				
+	def execute(self, context):
+		side = addonpref().sides.add()
+		side.name = "Side.%d" % len(addonpref().sides)
+		addonpref().active_side = len(addonpref().sides) - 1
+		
+		return {'FINISHED'}
+		
+class POSE_OT_juar_side_remove(bpy.types.Operator):
+	"""Remove the current Side"""
+	bl_idname = "pose.juar_side_remove"
+	bl_label = "Remove Side"
+	bl_options = {'REGISTER'}
+	
+	@classmethod
+	def poll(self, context):
+		return context.active_object and context.active_object.type == "ARMATURE"
+				
+	def execute(self, context):	
+		addonpref().sides.remove(addonpref().active_side)
+		len_ = len(addonpref().sides)
+		if (addonpref().active_side > (len_ - 1) and len_ > 0):
+			addonpref().active_side = len(addonpref().sides) - 1
+			
+		return {'FINISHED'}   
+		
+
+class POSE_OT_juar_side_init(bpy.types.Operator):
+	"""Init Side"""
+	bl_idname = "pose.juar_side_init"
+	bl_label = "Init Side"
+	bl_options = {'REGISTER'}
+	
+	@classmethod
+	def poll(self, context):
+		return True
+				
+	def execute(self, context):	
+		init_sides(context)
+			
+		return {'FINISHED'}
+		
 def register():
 
 	bpy.utils.register_class(POSE_OT_juar_limb_move)
@@ -249,6 +328,11 @@ def register():
 	bpy.utils.register_class(POSE_OT_juar_limb_select_bone)
 	bpy.utils.register_class(POSE_OT_juar_limb_select_bone_from_selection)
 	
+	bpy.utils.register_class(POSE_OT_juar_side_move)
+	bpy.utils.register_class(POSE_OT_juar_side_add)
+	bpy.utils.register_class(POSE_OT_juar_side_remove)
+	bpy.utils.register_class(POSE_OT_juar_side_init)
+	
 def unregister():
 
 	bpy.utils.unregister_class(POSE_OT_juar_limb_move)
@@ -261,4 +345,9 @@ def unregister():
 	
 	bpy.utils.unregister_class(POSE_OT_juar_limb_select_bone)
 	bpy.utils.unregister_class(POSE_OT_juar_limb_select_bone_from_selection)
+	
+	bpy.utils.unregister_class(POSE_OT_juar_side_move)
+	bpy.utils.unregister_class(POSE_OT_juar_side_add)
+	bpy.utils.unregister_class(POSE_OT_juar_side_remove)
+	bpy.utils.unregister_class(POSE_OT_juar_side_init)
 	

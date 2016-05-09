@@ -25,6 +25,17 @@ import bpy
 
 from .globals import *
 
+
+class POSE_UL_JuAR_SideList(bpy.types.UIList):
+	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+		
+		if self.layout_type in {'DEFAULT', 'COMPACT'}:
+			layout.prop(item, "name_L", text="", emboss=False)
+			layout.prop(item, "name_R", text="", emboss=False)
+			
+		elif self.layout_type in {'GRID'}:
+			layout.alignment = 'CENTER'	
+
 class POSE_UL_juar_LimbList(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
 		
@@ -258,6 +269,7 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 def register():
 	bpy.utils.register_class(POSE_UL_juar_LimbList)
 	bpy.utils.register_class(POSE_UL_juar_BoneList)
+	bpy.utils.register_class(POSE_UL_JuAR_SideList)
 	
 	bpy.utils.register_class(POSE_PT_juar_AutoRefSpace_Limbs)
 	bpy.utils.register_class(POSE_PT_juar_LimbDetail)
@@ -267,6 +279,7 @@ def register():
 def unregister():
 	bpy.utils.unregister_class(POSE_UL_juar_LimbList)
 	bpy.utils.unregister_class(POSE_UL_juar_BoneList)
+	bpy.utils.unregister_class(POSE_UL_JuAR_SideList)
 	
 	bpy.utils.unregister_class(POSE_PT_juar_AutoRefSpace_Limbs)
 	bpy.utils.unregister_class(POSE_PT_juar_LimbDetail)

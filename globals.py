@@ -140,6 +140,10 @@ def cb_active_AutoRefSpace(self, context):
 				bpy.ops.constraint.delete(C)
 				bone.constraint = ""
 		
+		
+class JuAR_SideItem(bpy.types.PropertyGroup):
+	name_R = bpy.props.StringProperty(name="Side name R")
+	name_L = bpy.props.StringProperty(name="Side name L")
 
 class BoneItem(bpy.types.PropertyGroup):
 	name = bpy.props.StringProperty(name="Bone Name")
