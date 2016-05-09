@@ -25,6 +25,11 @@ import bpy
 
 from .globals import *
 
+#shortcut to prefs
+def addonpref():
+	user_preferences = bpy.context.user_preferences
+	return user_preferences.addons[__package__].preferences
+
 def get_name(bone):
 	return bone
 	
@@ -70,5 +75,24 @@ def init_sides(context):
 	side.name_R = "right"
 	side.name_L = "left"
 	addonpref().active_side = 2
+	
+def check_child_of_list_bone(bones):
+	for bone in bones:
+		if check_child_of_bone(bone) == True:
+			return True
+	return False
+			
+def check_child_of_bone(bone):
+	if bone != "":
+		for constr in bpy.context.object.pose.bones[bone].constraints:
+			if constr.type == "CHILD_OF":
+				return True
+	return False
+			
+def set_active(bone_name):
+	armature = bpy.context.object
+	bpy.ops.pose.select_all(action='DESELECT')
+	armature.data.bones[bone_name].select = True
+	armature.data.bones.active = armature.data.bones[bone_name]
 
 

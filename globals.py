@@ -23,6 +23,8 @@
 
 import bpy
 
+from .utils import *
+
 def cb_enum_items(self, context):
 	items = []
 	
@@ -46,27 +48,7 @@ def cb_enum_update(self, context):
 				break
 		if found == True:
 			break
-			
-def check_child_of_list_bone(bones):
-	for bone in bones:
-		if check_child_of_bone(bone) == True:
-			return True
-	return False
-			
-def check_child_of_bone(bone):
-	if bone != "":
-		for constr in bpy.context.object.pose.bones[bone].constraints:
-			if constr.type == "CHILD_OF":
-				return True
-	return False
-			
-def set_active(bone_name):
-	armature = bpy.context.object
-	bpy.ops.pose.select_all(action='DESELECT')
-	armature.data.bones[bone_name].select = True
-	armature.data.bones.active = armature.data.bones[bone_name]
-
-	
+				
 def create_constraints(limb):
 	armature = bpy.context.object
 	
@@ -176,11 +158,6 @@ class JuAR_Generation(bpy.types.PropertyGroup):
 	view_location = bpy.props.EnumProperty(name="View location", items=view_location_items, default="TOOLS")
 	panel_name    = bpy.props.StringProperty(name="Panel name")
 	tab_tool      = bpy.props.StringProperty(name="Tab")
-	
-#shortcut to prefs
-def addonpref():
-	user_preferences = bpy.context.user_preferences
-	return user_preferences.addons[__package__].preferences
 	
 def register():
 	bpy.utils.register_class(BoneItem)
