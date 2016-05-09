@@ -240,7 +240,10 @@ class POSE_OT_juar_limb_copy(bpy.types.Operator):
 		for src_bone in armature.juar_limbs[src_limb_index].ref_bones:
 			dst_bone = dst_limb.ref_bones.add()
 			dst_bone.name = fct(src_bone.name)
-			dst_bone.label = fct(src_bone.label)
+			if src_bone.label != "":
+				dst_bone.label = fct(src_bone.label)
+			else:
+				dst_bone.label = fct(src_bone.name)
 			dst_bone.constraint = ""
 		dst_limb.active_ref_bone = armature.juar_limbs[src_limb_index].active_ref_bone
 		
