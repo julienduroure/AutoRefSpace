@@ -160,3 +160,8 @@ def check_single_duplicate(single_limb):
 	del names
 	
 	return duplicate
+
+def limb_check(limb_):
+	empty_bone, empty_refs, own_ref, constraint = checks(limb_)
+	duplicate = check_single_duplicate(limb_)
+	return empty_bone or empty_refs or own_ref or constraint or duplicate

@@ -235,7 +235,7 @@ class POSE_OT_juar_limb_copy(bpy.types.Operator):
 	
 	@classmethod
 	def poll(self, context):
-		return context.active_object and context.active_object.type == "ARMATURE" and len(context.active_object.juar_limbs) > 0
+		return context.active_object and context.active_object.type == "ARMATURE" and len(context.active_object.juar_limbs) > 0 and limb_check(context.active_object.juar_limbs[context.active_object.juar_active_limb]) == False
 				
 	def execute(self, context):
 	
