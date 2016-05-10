@@ -105,6 +105,17 @@ class POSE_OT_juar_limb_add(bpy.types.Operator):
 		
 		armature.juar_active_limb = len(armature.juar_limbs) - 1
 		
+		#Autofill with selection / active
+		if len(context.selected_pose_bones) != 0:
+			for bone in context.selected_pose_bones:
+				if bone.name == context.active_pose_bone.name:
+					limb.bone = bone.name
+				else:
+					ref = limb.ref_bones.add()
+					ref.name  = bone.name
+					ref.label = bone.name
+					limb.active_ref_bone = len(limb.ref_bones) - 1
+		
 		return {'FINISHED'}
 		
 class POSE_OT_juar_limb_remove(bpy.types.Operator):
