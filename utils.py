@@ -94,5 +94,69 @@ def set_active(bone_name):
 	bpy.ops.pose.select_all(action='DESELECT')
 	armature.data.bones[bone_name].select = True
 	armature.data.bones.active = armature.data.bones[bone_name]
+	
+def global_checks():
+	armature = bpy.context.object
+	
+	duplicate       = False
+	some_empty_bone = False
+	some_empty_refs = False
+	some_own_ref    = False
+	some_constraint = False
+	
+	names = {}
+	for limb_ in armature.juar_limbs:
+		if limb_.bone in names.keys():
+				duplicate = True
+				break
+		else:
+			names[limb_.bone] = limb_.bone
 
-
+		empty_bone, empty_refs, own_ref, constraint = checks(limb_)
+		if some_empty_bone == False:
+			some_empty_bone = empty_bone
+		if some_empty_refs == False:
+			some_empty_bone = empty_refs
+		if some_own_ref == False:
+			some_own_ref = own_ref
+		if some_constraint == False:
+			some_constraint = constraint
+	del names
+	
+	return duplicate, some_empty_bone, some_empty_refs, some_own_ref, some_constraint
+		
+def checks(limb_):
+	
+	empty_bone  = False
+	empty_refs  = False
+	own_ref     = False
+	constraint  = False
+	
+	if limb_.bone == "":
+		empty_bone = True
+	if len(limb_.ref_bones) == 0:
+		empty_refs = True
+	if limb_.bone in [bone_.name for bone_ in limb_.ref_bones] and limb_.bone != "":
+		own_ref = True	
+	if (limb_.active == False and limb_.generated == False) and check_child_of_bone(limb_.bone):
+		constraint = True
+		
+	return empty_bone, empty_refs, own_ref, constraint
+	
+def check_single_duplicate(single_limb):
+	armature = bpy.context.object
+	
+	duplicate = False
+	
+	names = {}
+	for limb_ in armature.juar_limbs:
+		if limb_.bone != single_limb.bone:
+			continue
+		if limb_.bone in names.keys():
+				duplicate = True
+				break
+		else:
+			names[limb_.bone] = limb_.bone
+	del names
+	
+	return duplicate
