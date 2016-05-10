@@ -226,9 +226,9 @@ class POSE_OT_juar_update_refspace(bpy.types.Operator):
 		
 
 class POSE_OT_juar_limb_copy(bpy.types.Operator):
-	"""Copy active limb, with mirror option"""
+	"""Copy active system, with mirror option"""
 	bl_idname = "pose.juar_limb_copy"
-	bl_label = "Copy Limb"
+	bl_label = "Copy system"
 	bl_options = {'REGISTER'}
 	
 	mirror = bpy.props.BoolProperty(name="Mirror", default=False)

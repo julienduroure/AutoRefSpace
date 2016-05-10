@@ -55,7 +55,7 @@ class POSE_UL_juar_BoneList(bpy.types.UIList):
 			layout.alignment = 'CENTER'
 			
 class POSE_PT_juar_AutoRefSpace_Limbs(bpy.types.Panel):
-	bl_label = "Limbs"
+	bl_label = "Reference system"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS'
 	bl_category = "AutoRefSpace"	
@@ -84,7 +84,7 @@ class POSE_PT_juar_AutoRefSpace_Limbs(bpy.types.Panel):
 			row.operator("pose.juar_limb_move", icon='TRIA_DOWN', text="").direction = 'DOWN'			
 			
 class POSE_PT_juar_LimbDetail(bpy.types.Panel):
-	bl_label = "Limb Detail"
+	bl_label = "Reference System Detail"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS'
 	bl_category = "AutoRefSpace"	
@@ -249,9 +249,9 @@ class POSE_MT_JuAR_limb_specials(bpy.types.Menu):
 	def draw(self, context):
 		layout = self.layout
 	
-		op = layout.operator("pose.juar_limb_copy", icon='COPY_ID', text="Copy Limb")
+		op = layout.operator("pose.juar_limb_copy", icon='COPY_ID', text="Copy system")
 		op.mirror = False
-		op = layout.operator("pose.juar_limb_copy", icon='ARROW_LEFTRIGHT', text="Mirror Copy Limb")
+		op = layout.operator("pose.juar_limb_copy", icon='ARROW_LEFTRIGHT', text="Mirror Copy system")
 		op.mirror = True		
 		
 			

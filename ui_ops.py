@@ -28,9 +28,9 @@ from .globals import *
 from .utils import *
 
 class POSE_OT_juar_limb_select_bone(bpy.types.Operator):
-	"""Set active bone to limb bone"""
+	"""Set active bone to system bone"""
 	bl_idname = "pose.juar_limb_select_bone"
-	bl_label = "Select Limb bone"
+	bl_label = "Select system bone"
 	bl_options = {'REGISTER'}
 	
 	bone = bpy.props.StringProperty()
@@ -55,9 +55,9 @@ class POSE_OT_juar_limb_select_bone(bpy.types.Operator):
 
 			
 class POSE_OT_juar_limb_move(bpy.types.Operator):
-	"""Move Limb up or down in the list"""
+	"""Move system up or down in the list"""
 	bl_idname = "pose.juar_limb_move"
-	bl_label = "Move Limb"
+	bl_label = "Move system"
 	bl_options = {'REGISTER'}
 	
 	direction = bpy.props.StringProperty()
@@ -84,9 +84,9 @@ class POSE_OT_juar_limb_move(bpy.types.Operator):
 		return {'FINISHED'}
 			
 class POSE_OT_juar_limb_add(bpy.types.Operator):
-	"""Add a new Limb"""
+	"""Add a new system"""
 	bl_idname = "pose.juar_limb_add"
-	bl_label = "Add Limb"
+	bl_label = "Add system"
 	bl_options = {'REGISTER'}
 	
 	@classmethod
@@ -108,9 +108,9 @@ class POSE_OT_juar_limb_add(bpy.types.Operator):
 		return {'FINISHED'}
 		
 class POSE_OT_juar_limb_remove(bpy.types.Operator):
-	"""Remove the current Limb"""
+	"""Remove the current system"""
 	bl_idname = "pose.juar_limb_remove"
-	bl_label = "Remove Limb"
+	bl_label = "Remove system"
 	bl_options = {'REGISTER'}
 	
 	@classmethod
@@ -216,7 +216,7 @@ class POSE_OT_juar_ref_bone_remove(bpy.types.Operator):
 		return {'FINISHED'}  		
 		
 class POSE_OT_juar_limb_select_bone_from_selection(bpy.types.Operator):
-	"""Set selected bones to colection"""
+	"""Set selected bones to collection"""
 	bl_idname = "pose.juar_limb_selected_bones_select"
 	bl_label = "Add selected bones"
 	bl_options = {'REGISTER'}	

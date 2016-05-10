@@ -26,12 +26,12 @@ bl_info = {
 	"author": "Julien Duroure",
 	"version": (0, 0, 1),
 	"blender": (2,77, 0),
-	"description": "Add Ref to your Bones",
+	"description": "Add RefSpace to your Bones",
 	"location": "View 3D tools, tab 'AutoRefSpace'",
 	"wiki_url": "http://julienduroure.com/AutoRefSpace",
 	"tracker_url": "https://github.com/julienduroure/AutoRefSpace",
 	"category": "Rigging",   
-	"warning": "This is an Alpha Version. Please report bugs :)",
+	"warning": "This is a Beta Version. Please report bugs :)",
 }
 
 if "bpy" in locals():
