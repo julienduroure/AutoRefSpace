@@ -105,7 +105,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		#Create call back for choice of items
 		txt = ""
 		for limb in limbs:
-			txt = txt + "\tif context.active_pose_bone.name == \"" + limb.bone + "\":\n"
+			txt = txt + "\tif self.name == \"" + limb.bone + "\":\n"
 			txt = txt + "\t\treturn items_" + limb.id + "\n"
 			
 		ui_generated_text_ = ui_generated_text_.replace("###ITEM_CHOICE###", txt )

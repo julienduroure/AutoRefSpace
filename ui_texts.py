@@ -54,9 +54,10 @@ class POSE_PT_JuAR_AutoRefSpace_###rig_id###(bpy.types.Panel):
 ###ENUM_LABELS###		
 		}
 		
-		row = layout.row()
-		if context.active_pose_bone and context.active_pose_bone.name in refspace_tab:
-			row.prop(context.active_pose_bone, "autorefspace_enum", text=enum_name[context.active_pose_bone.name])
+		for bone in refspace_tab:
+			if bone in [b.name for b in context.selected_pose_bones]:
+				row = layout.row()
+				row.prop(armature.pose.bones[bone], "autorefspace_enum", text=enum_name[bone])
 
 def register():
 	bpy.utils.register_class(POSE_PT_JuAR_AutoRefSpace_###rig_id###)
