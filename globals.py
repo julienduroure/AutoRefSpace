@@ -24,6 +24,23 @@
 import bpy
 
 from .utils import *
+from .ui import*
+
+def update_panel(self, context):
+	bpy.utils.unregister_class(POSE_PT_juar_AutoRefSpace_Limbs)
+	bpy.utils.unregister_class(POSE_PT_juar_LimbDetail)
+	bpy.utils.unregister_class(POSE_PT_juar_LiveAutoRefSpace)
+	bpy.utils.unregister_class(POSE_PT_juar_LimbGenerate)
+	
+	POSE_PT_juar_AutoRefSpace_Limbs.bl_category = addonpref().category
+	POSE_PT_juar_LimbDetail.bl_category = addonpref().category
+	POSE_PT_juar_LiveAutoRefSpace.bl_category = addonpref().category
+	POSE_PT_juar_LimbGenerate.bl_category = addonpref().category
+	
+	bpy.utils.register_class(POSE_PT_juar_AutoRefSpace_Limbs)
+	bpy.utils.register_class(POSE_PT_juar_LimbDetail)
+	bpy.utils.register_class(POSE_PT_juar_LiveAutoRefSpace)
+	bpy.utils.register_class(POSE_PT_juar_LimbGenerate)
 
 def cb_enum_items(self, context):
 	items = []

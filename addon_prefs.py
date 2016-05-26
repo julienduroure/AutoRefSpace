@@ -35,6 +35,8 @@ class JuAR_Preferences(bpy.types.AddonPreferences):
 	sides = bpy.props.CollectionProperty(type=JuAR_SideItem)
 	active_side = bpy.props.IntProperty()
 	
+	category = bpy.props.StringProperty(name="Category", default="AutoRefSpace", update=update_panel)
+	
 	def draw(self, context):
 		layout = self.layout
 		row_global = layout.row()
@@ -43,9 +45,12 @@ class JuAR_Preferences(bpy.types.AddonPreferences):
 		
 		box = col.box()
 		row = box.row()
+		row.prop(self, "category", text="Addon tab")
+		box = col.box()
+		row = box.row()
 		row.prop(self, "panel_name", text="Default Panel Name")
 		row = box.row()
-		row.prop(self, "tab_tool", text="Default Tab")
+		row.prop(self, "tab_tool", text="Default Generated Tab")
 		row = box.row()
 		row.prop(self, "enum_label", text="Default Enum Label")
 		
