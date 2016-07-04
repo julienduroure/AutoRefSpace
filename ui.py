@@ -28,77 +28,77 @@ from .globals import *
 
 class POSE_UL_JuAR_SideList(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-		
+
 		if self.layout_type in {'DEFAULT', 'COMPACT'}:
 			layout.prop(item, "name_L", text="", emboss=False)
 			layout.prop(item, "name_R", text="", emboss=False)
-			
+
 		elif self.layout_type in {'GRID'}:
-			layout.alignment = 'CENTER'	
+			layout.alignment = 'CENTER'
 
 class POSE_UL_juar_LimbList(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-		
+
 		if self.layout_type in {'DEFAULT', 'COMPACT'}:
 			layout.prop(item, "name", text="", emboss=False)
-			
+
 		elif self.layout_type in {'GRID'}:
 			layout.alignment = 'CENTER'
-			
+
 class POSE_UL_juar_BoneList(bpy.types.UIList):
 	def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-		
+
 		if self.layout_type in {'DEFAULT', 'COMPACT'}:
 			layout.prop(item, "name", text="", emboss=False)
-			
+
 		elif self.layout_type in {'GRID'}:
 			layout.alignment = 'CENTER'
-			
+
 class POSE_PT_juar_AutoRefSpace_Limbs(bpy.types.Panel):
 	bl_label = "Reference system"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS'
-	bl_category = "AutoRefSpace"	
-	
+	bl_category = "AutoRefSpace"
+
 	@classmethod
 	def poll(self, context):
 		return context.active_object and context.active_object.type == "ARMATURE" and context.mode == 'POSE'
-		
+
 	def draw(self, context):
 		layout = self.layout
 		armature = context.object
-		
+
 		row = layout.row()
 		row.template_list("POSE_UL_juar_LimbList", "", armature, "juar_limbs", armature, "juar_active_limb")
-		
+
 		col = row.column()
 		row = col.column(align=True)
 		row.operator("pose.juar_limb_add", icon="ZOOMIN", text="")
 		row.operator("pose.juar_limb_remove", icon="ZOOMOUT", text="")
 		row.menu("POSE_MT_JuAR_limb_specials", icon='DOWNARROW_HLT', text="")
-			
+
 		if len(context.active_object.juar_limbs) > 0:
 			row = col.column(align=True)
 			row.separator()
 			row.operator("pose.juar_limb_move", icon='TRIA_UP', text="").direction = 'UP'
-			row.operator("pose.juar_limb_move", icon='TRIA_DOWN', text="").direction = 'DOWN'			
-			
+			row.operator("pose.juar_limb_move", icon='TRIA_DOWN', text="").direction = 'DOWN'
+
 class POSE_PT_juar_LimbDetail(bpy.types.Panel):
 	bl_label = "Reference System Detail"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS'
-	bl_category = "AutoRefSpace"	
-	
+	bl_category = "AutoRefSpace"
+
 	@classmethod
 	def poll(self, context):
 		armature = context.active_object
 		return armature and armature.type == "ARMATURE" and len(armature.juar_limbs) > 0 and context.mode == 'POSE' and armature.juar_limbs[armature.juar_active_limb].active == False and armature.juar_limbs[armature.juar_active_limb].generated == False
-		
+
 	def draw(self, context):
 		layout = self.layout
 		armature = context.object
 		limb = armature.juar_limbs[armature.juar_active_limb]
-		
+
 		row = layout.row()
 		row.prop(limb, "enum_label", text="Label")
 		row = layout.row()
@@ -109,24 +109,24 @@ class POSE_PT_juar_LimbDetail(bpy.types.Panel):
 		row_ = col.column(align=True)
 		op = row.operator("pose.juar_limb_select_bone", icon="BONE_DATA", text="")
 		op.bone = "bone"
-		
+
 		row = layout.row()
 		op = row.operator("pose.juar_limb_selected_bones_select", text="Fill from selection")
 		op.bone = "ref_bones"
 		row = layout.row()
 		row.template_list("POSE_UL_juar_BoneList", "", limb, "ref_bones", limb, "active_ref_bone")
-		
+
 		col = row.column()
 		row = col.column(align=True)
 		row.operator("pose.juar_ref_bone_add", icon="ZOOMIN", text="")
 		row.operator("pose.juar_ref_bone_remove", icon="ZOOMOUT", text="")
-			
+
 		if len(limb.ref_bones) > 0:
 			row = col.column(align=True)
 			row.separator()
 			row.operator("pose.juar_ref_bone_move", icon='TRIA_UP', text="").direction = 'UP'
 			row.operator("pose.juar_ref_bone_move", icon='TRIA_DOWN', text="").direction = 'DOWN'
-			
+
 		row = layout.row()
 		if len(context.active_object.juar_limbs[context.active_object.juar_active_limb].ref_bones) > 0:
 			col = row.column()
@@ -136,34 +136,34 @@ class POSE_PT_juar_LimbDetail(bpy.types.Panel):
 			row_ = col.column(align=True)
 			op = row.operator("pose.juar_limb_select_bone", icon="BONE_DATA", text="")
 			op.bone = "active_ref_bone"
-			
+
 			row = layout.row()
 			row.prop(limb.ref_bones[limb.active_ref_bone], "label")
-			
+
 class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 	bl_label = "Live AutoRefSpace"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS'
-	bl_category = "AutoRefSpace"				
-	
+	bl_category = "AutoRefSpace"
+
 	@classmethod
 	def poll(self, context):
 		armature = context.active_object
 		return armature and armature.type == "ARMATURE" and len(armature.juar_limbs) > 0 and context.mode == 'POSE'
-		
+
 	def draw(self, context):
 		layout = self.layout
 		armature = context.object
 		limb = armature.juar_limbs[armature.juar_active_limb]
-		
+
 		#Checks
-		
+
 		empty_bone, empty_refs, own_ref, constraint = checks(limb)
 		duplicate = check_single_duplicate(limb)
 
 		row = layout.row()
 		row.prop(limb, "active", toggle=True)
-		#Do NOT let active for any of following cases : 
+		#Do NOT let active for any of following cases :
 		if empty_bone == True or empty_refs == True or limb.generated == True or duplicate == True or own_ref == True or constraint == True:
 			row.enabled = False
 		#No bone
@@ -188,31 +188,31 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 			row.label("Bone is its own ref", icon='ERROR')
 		if constraint == True:
 			row = layout.row()
-			row.label("Already child of constraint on bone", icon='ERROR')			
-		
+			row.label("Already child of constraint on bone", icon='ERROR')
+
 		if limb.active == True:
 			row = layout.row()
 			row.prop(limb, "enum", text="Ref")
-		
+
 		if limb.generated == True:
 			row = layout.row()
 			row.operator("pose.juar_update_refspace", text="Update")
-			
+
 class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 	bl_label = "Generate"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'TOOLS'
-	bl_category = "AutoRefSpace"	
-	
+	bl_category = "AutoRefSpace"
+
 	@classmethod
 	def poll(self, context):
 		armature = context.active_object
 		return armature and armature.type == "ARMATURE" and len(armature.juar_limbs) > 0 and context.mode == 'POSE'
-		
+
 	def draw(self, context):
 		layout = self.layout
 		armature = context.object
-	
+
 		#Checks
 		duplicate, some_empty_bone, some_empty_refs, some_own_ref, some_constraint = global_checks()
 
@@ -238,43 +238,43 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 			row.label("Some Refs are not filled", icon='ERROR')
 		if some_constraint == True:
 			row = layout.row()
-			row.label("Some bone have already child of constraint", icon='ERROR')			
+			row.label("Some bone have already child of constraint", icon='ERROR')
 		if some_own_ref == True:
 			row = layout.row()
 			row.label("Some bones are self-ref", icon='ERROR')
-		
+
 class POSE_MT_JuAR_limb_specials(bpy.types.Menu):
 	bl_label = "Limb Specials"
 
 	def draw(self, context):
 		layout = self.layout
-	
+
 		op = layout.operator("pose.juar_limb_copy", icon='COPY_ID', text="Copy system")
 		op.mirror = False
 		op = layout.operator("pose.juar_limb_copy", icon='ARROW_LEFTRIGHT', text="Mirror Copy system")
-		op.mirror = True		
-		
-			
+		op.mirror = True
+
+
 def register():
 	bpy.utils.register_class(POSE_UL_juar_LimbList)
 	bpy.utils.register_class(POSE_UL_juar_BoneList)
 	bpy.utils.register_class(POSE_UL_JuAR_SideList)
-	
+
 	bpy.utils.register_class(POSE_PT_juar_AutoRefSpace_Limbs)
 	bpy.utils.register_class(POSE_PT_juar_LimbDetail)
 	bpy.utils.register_class(POSE_PT_juar_LiveAutoRefSpace)
 	bpy.utils.register_class(POSE_PT_juar_LimbGenerate)
-	
+
 	bpy.utils.register_class(POSE_MT_JuAR_limb_specials)
-	
+
 def unregister():
 	bpy.utils.unregister_class(POSE_UL_juar_LimbList)
 	bpy.utils.unregister_class(POSE_UL_juar_BoneList)
 	bpy.utils.unregister_class(POSE_UL_JuAR_SideList)
-	
+
 	bpy.utils.unregister_class(POSE_PT_juar_AutoRefSpace_Limbs)
 	bpy.utils.unregister_class(POSE_PT_juar_LimbDetail)
 	bpy.utils.unregister_class(POSE_PT_juar_LiveAutoRefSpace)
 	bpy.utils.unregister_class(POSE_PT_juar_LimbGenerate)
-	
-	bpy.utils.register_class(POSE_MT_JuAR_limb_specials)
+
+	bpy.utils.unregister_class(POSE_MT_JuAR_limb_specials)
