@@ -23,7 +23,7 @@
 
 import bpy
 
-from .globals import *
+from .globs import *
 
 #shortcut to prefs
 def addonpref():
@@ -32,7 +32,7 @@ def addonpref():
 
 def get_name(bone):
 	return bone
-	
+
 def get_symm_name(bone):
 	#first check if last digit are .xxx with [dot] and then xxx is integer
 	end_name = ""
@@ -41,8 +41,8 @@ def get_symm_name(bone):
 		end_name = bone[len(bone)-4:]
 	else:
 		end_pos = len(bone)
-		
-		
+
+
 	#construct dict for each length of potential side
 	side_len = {}
 	for side in addonpref().sides:
@@ -56,7 +56,7 @@ def get_symm_name(bone):
 		else:
 			side_len[len(side.name_L)] = []
 			side_len[len(side.name_L)].append((side.name_L, side.name_R))
-			
+
 	for side_l in side_len.keys():
 		if bone[end_pos-side_l:end_pos] in [name[0] for name in side_len[side_l]]:
 			return bone[:end_pos-side_l] + side_len[side_l][[name[0] for name in side_len[side_l]].index(bone[end_pos-side_l:end_pos])][1] + end_name
@@ -75,35 +75,35 @@ def init_sides(context):
 	side.name_R = "right"
 	side.name_L = "left"
 	addonpref().active_side = 2
-	
+
 def check_child_of_list_bone(bones):
 	for bone in bones:
 		if check_child_of_bone(bone) == True:
 			return True
 	return False
-			
+
 def check_child_of_bone(bone):
 	if bone != "":
 		for constr in bpy.context.object.pose.bones[bone].constraints:
 			if constr.type == "CHILD_OF":
 				return True
 	return False
-			
+
 def set_active(bone_name):
 	armature = bpy.context.object
 	bpy.ops.pose.select_all(action='DESELECT')
 	armature.data.bones[bone_name].select = True
 	armature.data.bones.active = armature.data.bones[bone_name]
-	
+
 def global_checks():
 	armature = bpy.context.object
-	
+
 	duplicate       = False
 	some_empty_bone = False
 	some_empty_refs = False
 	some_own_ref    = False
 	some_constraint = False
-	
+
 	names = {}
 	for limb_ in armature.juar_limbs:
 		if limb_.bone in names.keys():
@@ -122,32 +122,32 @@ def global_checks():
 		if some_constraint == False:
 			some_constraint = constraint
 	del names
-	
+
 	return duplicate, some_empty_bone, some_empty_refs, some_own_ref, some_constraint
-		
+
 def checks(limb_):
-	
+
 	empty_bone  = False
 	empty_refs  = False
 	own_ref     = False
 	constraint  = False
-	
+
 	if limb_.bone == "":
 		empty_bone = True
 	if len(limb_.ref_bones) == 0:
 		empty_refs = True
 	if limb_.bone in [bone_.name for bone_ in limb_.ref_bones] and limb_.bone != "":
-		own_ref = True	
+		own_ref = True
 	if (limb_.active == False and limb_.generated == False) and check_child_of_bone(limb_.bone):
 		constraint = True
-		
+
 	return empty_bone, empty_refs, own_ref, constraint
-	
+
 def check_single_duplicate(single_limb):
 	armature = bpy.context.object
-	
+
 	duplicate = False
-	
+
 	names = {}
 	for limb_ in armature.juar_limbs:
 		if limb_.bone != single_limb.bone:
@@ -158,7 +158,7 @@ def check_single_duplicate(single_limb):
 		else:
 			names[limb_.bone] = limb_.bone
 	del names
-	
+
 	return duplicate
 
 def limb_check(limb_):

@@ -23,7 +23,7 @@
 
 import bpy
 
-from .globals import *
+from .globs import *
 
 
 class POSE_UL_JuAR_SideList(bpy.types.UIList):
