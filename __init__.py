@@ -34,14 +34,14 @@ bl_info = {
 }
 
 if "bpy" in locals():
-	import imp
-	imp.reload(addon_prefs)
-	imp.reload(ui_texts)
-	imp.reload(globs)
-	imp.reload(utils)
-	imp.reload(ui)
-	imp.reload(ui_ops)
-	imp.reload(ops)
+	import importlib
+	importlib.reload(addon_prefs)
+	importlib.reload(ui_texts)
+	importlib.reload(globs)
+	importlib.reload(utils)
+	importlib.reload(ui)
+	importlib.reload(ui_ops)
+	importlib.reload(ops)
 else:
 	from .addon_prefs import *
 	from .ui_texts import *
@@ -60,19 +60,23 @@ def register():
 	ui_ops.register()
 	ui.register()
 
-	bpy.types.Object.juar_generation = bpy.props.PointerProperty(type=JuAR_Generation)
-	bpy.types.Object.juar_limbs = bpy.props.CollectionProperty(type=LimbItem)
+	bpy.types.Object.juar_limbs = bpy.props.CollectionProperty(type=globs.LimbItem)
 	bpy.types.Object.juar_active_limb = bpy.props.IntProperty()
+	bpy.types.Object.juar_generation = bpy.props.PointerProperty(type=globs.JuAR_Generation)
 
 def unregister():
+
+	del bpy.types.Object.juar_limbs
+	del bpy.types.Object.juar_active_limb
+	del bpy.types.Object.juar_generation
+
+
 	addon_prefs.unregister()
 	globs.unregister()
 	ops.unregister()
 	ui_ops.unregister()
 	ui.unregister()
 
-	del bpy.types.Object.juar_limbs
-	del bpy.types.Object.juar_active_limb
 
 if __name__ == "__main__":
 	register()
