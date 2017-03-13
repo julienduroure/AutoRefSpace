@@ -29,7 +29,7 @@ bl_info = {
 	"description": "Add RefSpace to your Bones",
 	"location": "View 3D tools, tab 'AutoRefSpace'",
 	"wiki_url": "http://blerifa.com/AutoRefSpace/",
-	"tracker_url": "https://github.com/julienduroure/AutoRefSpace/issues/",
+	"tracker_url": "https://github.com/julienduroure/BleRiFa/issues/",
 	"category": "Rigging",
 }
 
