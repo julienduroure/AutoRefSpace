@@ -136,19 +136,26 @@ class POSE_OT_juar_limb_remove(bpy.types.Operator):
 		armature = context.object
 		limb = armature.juar_limbs[armature.juar_active_limb]
 
-		for bone in limb.ref_bones:
-			if bone.name == "":
-				continue
-			if limb.bone != "" and armature.pose.bones[limb.bone].constraints.get(bone.constraint):
-				C = bpy.context.copy()
-				C["constraint"] = armature.pose.bones[limb.bone].constraints.get(bone.constraint)
-				bpy.ops.constraint.delete(C)
-				bone.constraint = ""
+		if addonpref().juar_mode == "CHILDOF":
 
-		armature.juar_limbs.remove(armature.juar_active_limb)
-		len_ = len(armature.juar_limbs)
-		if (armature.juar_active_limb > (len_ - 1) and len_ > 0):
-			armature.juar_active_limb = len(armature.juar_limbs) - 1
+			for bone in limb.ref_bones:
+				if bone.name == "":
+					continue
+				if limb.bone != "" and armature.pose.bones[limb.bone].constraints.get(bone.constraint):
+					C = bpy.context.copy()
+					C["constraint"] = armature.pose.bones[limb.bone].constraints.get(bone.constraint)
+					bpy.ops.constraint.delete(C)
+					bone.constraint = ""
+
+			armature.juar_limbs.remove(armature.juar_active_limb)
+			len_ = len(armature.juar_limbs)
+			if (armature.juar_active_limb > (len_ - 1) and len_ > 0):
+				armature.juar_active_limb = len(armature.juar_limbs) - 1
+
+		elif addonpref().juar_mode == "TRANSFORM":
+			pass
+		else:
+			pass
 
 		return {'FINISHED'}
 
