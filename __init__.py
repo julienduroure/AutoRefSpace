@@ -24,7 +24,7 @@
 bl_info = {
 	"name": "AutoRefSpace",
 	"author": "Julien Duroure",
-	"version": (1, 0, 0),
+	"version": (0, 1, 0),
 	"blender": (2,78, 0),
 	"description": "Add RefSpace to your Bones",
 	"location": "View 3D tools, tab 'AutoRefSpace'",
