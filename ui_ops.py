@@ -153,7 +153,10 @@ class POSE_OT_juar_limb_remove(bpy.types.Operator):
 				armature.juar_active_limb = len(armature.juar_limbs) - 1
 
 		elif addonpref().juar_mode == "TRANSFORM":
-			pass
+			armature.juar_limbs.remove(armature.juar_active_limb)
+			len_ = len(armature.juar_limbs)
+			if (armature.juar_active_limb > (len_ - 1) and len_ > 0):
+				armature.juar_active_limb = len(armature.juar_limbs) - 1
 		else:
 			pass
 
