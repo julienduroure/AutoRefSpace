@@ -71,7 +71,34 @@ def cb_enum_update(self, context):
 				break
 
 	elif addonpref().juar_mode == "TRANSFORM":
-		pass
+
+		#store world location / rotation / scale of current bone
+		matrix = armature.convert_space(armature.pose.bones[limb.bone_target], armature.pose.bones[limb.bone_target].matrix, 'POSE', 'WORLD')
+
+		#activate default constraint (by setting influence to 1)
+		for constr in armature.pose.bones[limb.bone_target].constraints:
+			for bone in limb.ref_bones:
+				if constr.name == bone.constraint:
+					if bone.label == limb.enum:
+						#constr.influence = 1.0
+						#limb.current_bone = bone.name
+						# restore matrix
+						armature.pose.bones[bone.new_bone_name].matrix = armature.convert_space(armature.pose.bones[bone.new_bone_name], matrix, 'WORLD', 'POSE')
+					else:
+						#constr.influence = 0.0
+						pass
+
+		for constr in armature.pose.bones[limb.bone_target].constraints:
+			for bone in limb.ref_bones:
+				if constr.name == bone.constraint:
+					if bone.label == limb.enum:
+						constr.influence = 1.0
+						limb.current_bone = bone.name
+					else:
+						constr.influence = 0.0
+
+
+
 	else:
 		pass
 
@@ -101,6 +128,32 @@ def create_constraints(limb):
 		childof.influence = 0.0
 		bone.constraint = childof.name
 
+		cpt = cpt + 1
+
+def create_transform_contraints(limb):
+	armature = bpy.context.object
+
+	set_active(limb.bone_target)
+	cpt = 1
+	for bone in limb.ref_bones:
+		if bone.name == "":
+			continue
+
+		#create constraint
+		transform_loc = armature.pose.bones[limb.bone_target].constraints.new(type="COPY_TRANSFORMS")
+		transform_loc.target = armature
+		transform_loc.subtarget = bone.new_bone_name
+		name = "AutoRefSpace " + bone.name
+		transform_loc.name = name
+
+		#Move to top
+		C = bpy.context.copy()
+		C["constraint"] = transform_loc
+		tab_size = len(armature.pose.bones[limb.bone].constraints)
+		for i in range(cpt, tab_size):
+			bpy.ops.constraint.move_up(C, constraint=transform_loc.name,owner='BONE')
+		transform_loc.influence = 0.0
+		bone.constraint = transform_loc.name
 		cpt = cpt + 1
 
 def cb_active_AutoRefSpace(self, context):
@@ -160,8 +213,76 @@ def cb_active_AutoRefSpace(self, context):
 					C["constraint"] = armature.pose.bones[limb.bone].constraints.get(bone.constraint)
 					bpy.ops.constraint.delete(C)
 					bone.constraint = ""
+
 	elif addonpref().juar_mode == "TRANSFORM":
-		pass
+		if limb.active == True:
+
+			#Set default label if needed
+			for bone in limb.ref_bones:
+				if bone.label == "":
+					bone.label = bone.name
+
+			#Store Parent
+			bpy.ops.object.mode_set(mode='EDIT')
+			if armature.data.edit_bones[limb.bone].parent:
+				limb.parent = armature.data.edit_bones[limb.bone].parent.name
+			else:
+				limb.parent = ""
+
+			# Create corresponding bones
+			new_ = armature.data.edit_bones.new("target_" + limb.bone)
+			new_name = new_.name
+			armature.data.edit_bones[new_name].head = armature.data.edit_bones[limb.bone].head
+			armature.data.edit_bones[new_name].tail = armature.data.edit_bones[limb.bone].tail
+			armature.data.edit_bones[new_name].roll = armature.data.edit_bones[limb.bone].roll
+			limb.bone_target = new_name
+			new_.parent = armature.data.edit_bones[limb.bone].parent
+
+			armature.data.edit_bones[limb.bone].parent = new_
+			for bone in limb.ref_bones:
+				new_ = armature.data.edit_bones.new(limb.bone + "_" + bone.name)
+				new_name = new_.name
+				armature.data.edit_bones[new_name].head = armature.data.edit_bones[limb.bone].head
+				armature.data.edit_bones[new_name].tail = armature.data.edit_bones[limb.bone].tail
+				armature.data.edit_bones[new_name].roll = armature.data.edit_bones[limb.bone].roll
+				bone.new_bone_name = new_name
+				new_.parent = armature.data.edit_bones[bone.name]
+			bpy.ops.object.mode_set(mode='POSE')
+
+			for bone in limb.ref_bones:
+				armature.data.bones[bone.new_bone_name].hide = True
+			armature.data.bones[limb.bone_target].hide = True
+
+			# Create constraints
+			create_transform_contraints(limb)
+
+			#activate default constraint (by setting influence to 1)
+			for constr in armature.pose.bones[limb.bone_target].constraints:
+				for bone in limb.ref_bones:
+					if constr.name == bone.constraint:
+						if bone.label == limb.enum:
+							constr.influence = 1.0
+							limb.current_bone = bone.name
+						else:
+							constr.influence = 0.0
+
+		else:
+			#Reset parent of bone
+			bpy.ops.object.mode_set(mode='EDIT')
+			if limb.parent != "":
+				armature.data.edit_bones[limb.bone].parent = armature.data.edit_bones[limb.parent]
+			else:
+				armature.data.edit_bones[limb.bone].parent = None
+			limb.parent = ""
+			bpy.ops.object.mode_set(mode='POSE')
+
+			# delete bones
+			bpy.ops.object.mode_set(mode='EDIT')
+			for bone in limb.ref_bones:
+				armature.data.edit_bones.remove(armature.data.edit_bones[bone.new_bone_name])
+				bone.new_bone_name = ""
+			armature.data.edit_bones.remove(armature.data.edit_bones[limb.bone_target])
+			bpy.ops.object.mode_set(mode='POSE')
 	else:
 		pass
 
@@ -173,7 +294,8 @@ class JuAR_SideItem(bpy.types.PropertyGroup):
 class BoneItem(bpy.types.PropertyGroup):
 	name = bpy.props.StringProperty(name="Bone Name")
 	label = bpy.props.StringProperty(name="Label")
-	constraint = bpy.props.StringProperty(name="Label")
+	constraint = bpy.props.StringProperty(name="Label") # not used for transform
+	new_bone_name = bpy.props.StringProperty(name="New bone name")        #transform
 
 class LimbItem(bpy.types.PropertyGroup):
 
@@ -184,6 +306,8 @@ class LimbItem(bpy.types.PropertyGroup):
 
 	bone = bpy.props.StringProperty(name="Bone")
 	parent = bpy.props.StringProperty(name="Parent")
+	bone_target = bpy.props.StringProperty(name="Bone Target")
+	current_bone = bpy.props.StringProperty(name="Current Bone")
 
 	ref_bones = bpy.props.CollectionProperty(type=BoneItem)
 	active_ref_bone = bpy.props.IntProperty()
