@@ -76,19 +76,6 @@ def init_sides(context):
 	side.name_L = "left"
 	addonpref().active_side = 2
 
-def check_child_of_list_bone(bones):
-	for bone in bones:
-		if check_child_of_bone(bone) == True:
-			return True
-	return False
-
-def check_child_of_bone(bone):
-	if bone != "":
-		for constr in bpy.context.object.pose.bones[bone].constraints:
-			if constr.type == "CHILD_OF":
-				return True
-	return False
-
 def set_active(bone_name):
 	armature = bpy.context.object
 	bpy.ops.pose.select_all(action='DESELECT')
@@ -112,25 +99,22 @@ def global_checks():
 		else:
 			names[limb_.bone] = limb_.bone
 
-		empty_bone, empty_refs, own_ref, constraint = checks(limb_)
+		empty_bone, empty_refs, own_ref = checks(limb_)
 		if some_empty_bone == False:
 			some_empty_bone = empty_bone
 		if some_empty_refs == False:
 			some_empty_bone = empty_refs
 		if some_own_ref == False:
 			some_own_ref = own_ref
-		if some_constraint == False:
-			some_constraint = constraint
 	del names
 
-	return duplicate, some_empty_bone, some_empty_refs, some_own_ref, some_constraint
+	return duplicate, some_empty_bone, some_empty_refs, some_own_ref
 
 def checks(limb_):
 
 	empty_bone  = False
 	empty_refs  = False
 	own_ref     = False
-	constraint  = False
 
 	if limb_.bone == "":
 		empty_bone = True
@@ -138,10 +122,8 @@ def checks(limb_):
 		empty_refs = True
 	if limb_.bone in [bone_.name for bone_ in limb_.ref_bones] and limb_.bone != "":
 		own_ref = True
-	if (limb_.active == False and limb_.generated == False) and check_child_of_bone(limb_.bone):
-		constraint = True
 
-	return empty_bone, empty_refs, own_ref, constraint
+	return empty_bone, empty_refs, own_ref
 
 def check_single_duplicate(single_limb):
 	armature = bpy.context.object
@@ -162,6 +144,6 @@ def check_single_duplicate(single_limb):
 	return duplicate
 
 def limb_check(limb_):
-	empty_bone, empty_refs, own_ref, constraint = checks(limb_)
+	empty_bone, empty_refs, own_ref = checks(limb_)
 	duplicate = check_single_duplicate(limb_)
-	return empty_bone or empty_refs or own_ref or constraint or duplicate
+	return empty_bone or empty_refs or own_ref or duplicate

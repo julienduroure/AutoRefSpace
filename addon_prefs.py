@@ -28,8 +28,6 @@ from .globs import *
 class JuAR_Preferences(bpy.types.AddonPreferences):
 	bl_idname = __package__
 
-	juar_mode  = bpy.props.EnumProperty(items=juar_mode_items, name="mode", default="CHILDOF")
-
 	panel_name = bpy.props.StringProperty(name="Default Panel name", default="RefSpace")
 	tab_tool   = bpy.props.StringProperty(name="Default Tab name", default="RefSpace")
 	enum_label = bpy.props.StringProperty(name="Default Enum Label", default="RefSpace")

@@ -158,13 +158,13 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 
 		#Checks
 
-		empty_bone, empty_refs, own_ref, constraint = checks(limb)
+		empty_bone, empty_refs, own_ref = checks(limb)
 		duplicate = check_single_duplicate(limb)
 
 		row = layout.row()
 		row.prop(limb, "active", toggle=True)
 		#Do NOT let active for any of following cases :
-		if empty_bone == True or empty_refs == True or limb.generated == True or duplicate == True or own_ref == True or constraint == True:
+		if empty_bone == True or empty_refs == True or limb.generated == True or duplicate == True or own_ref == True:
 			row.enabled = False
 		#No bone
 		if empty_bone == True:
@@ -186,9 +186,6 @@ class POSE_PT_juar_LiveAutoRefSpace(bpy.types.Panel):
 		if own_ref == True:
 			row = layout.row()
 			row.label("Bone is its own ref", icon='ERROR')
-		if constraint == True:
-			row = layout.row()
-			row.label("Already child of constraint on bone", icon='ERROR')
 
 		if limb.active == True:
 			row = layout.row()
@@ -213,67 +210,33 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 		layout = self.layout
 		armature = context.object
 
-		if addonpref().juar_mode == "CHILDOF":
+		#Checks
+		duplicate, some_empty_bone, some_empty_refs, some_own_ref = global_checks()
 
-			#Checks
-			duplicate, some_empty_bone, some_empty_refs, some_own_ref, some_constraint = global_checks()
+		row = layout.row()
+		row.prop(armature.juar_generation, "view_location")
+		row = layout.row()
+		row.prop(armature.juar_generation, "panel_name")
+		if armature.juar_generation.view_location == "TOOLS":
+			row = layout.row()
+			row.prop(armature.juar_generation, "tab_tool")
+		row = layout.row()
+		row.operator("pose.juar_generate_refspace", text="Generate")
+		if duplicate == True or some_empty_bone == True or some_empty_refs == True or some_own_ref == True:
+			row.enabled = False
+		if duplicate == True:
+			row = layout.row()
+			row.label("Duplicate", icon='ERROR')
+		if some_empty_bone == True:
+			row = layout.row()
+			row.label("Some bones are not filled", icon='ERROR')
+		if some_empty_refs == True:
+			row = layout.row()
+			row.label("Some Refs are not filled", icon='ERROR')
+		if some_own_ref == True:
+			row = layout.row()
+			row.label("Some bones are self-ref", icon='ERROR')
 
-			row = layout.row()
-			row.prop(armature.juar_generation, "view_location")
-			row = layout.row()
-			row.prop(armature.juar_generation, "panel_name")
-			if armature.juar_generation.view_location == "TOOLS":
-				row = layout.row()
-				row.prop(armature.juar_generation, "tab_tool")
-			row = layout.row()
-			row.operator("pose.juar_generate_refspace_childof", text="Generate")
-			if duplicate == True or some_empty_bone == True or some_empty_refs == True or some_own_ref == True or some_constraint == True:
-				row.enabled = False
-			if duplicate == True:
-				row = layout.row()
-				row.label("Duplicate", icon='ERROR')
-			if some_empty_bone == True:
-				row = layout.row()
-				row.label("Some bones are not filled", icon='ERROR')
-			if some_empty_refs == True:
-				row = layout.row()
-				row.label("Some Refs are not filled", icon='ERROR')
-			if some_constraint == True:
-				row = layout.row()
-				row.label("Some bone have already child of constraint", icon='ERROR')
-			if some_own_ref == True:
-				row = layout.row()
-				row.label("Some bones are self-ref", icon='ERROR')
-
-		elif addonpref().juar_mode == "TRANSFORM":
-			#Checks
-			duplicate, some_empty_bone, some_empty_refs, some_own_ref, some_constraint = global_checks()
-
-			row = layout.row()
-			row.prop(armature.juar_generation, "view_location")
-			row = layout.row()
-			row.prop(armature.juar_generation, "panel_name")
-			if armature.juar_generation.view_location == "TOOLS":
-				row = layout.row()
-				row.prop(armature.juar_generation, "tab_tool")
-			row = layout.row()
-			row.operator("pose.juar_generate_refspace", text="Generate")
-			if duplicate == True or some_empty_bone == True or some_empty_refs == True or some_own_ref == True:
-				row.enabled = False
-			if duplicate == True:
-				row = layout.row()
-				row.label("Duplicate", icon='ERROR')
-			if some_empty_bone == True:
-				row = layout.row()
-				row.label("Some bones are not filled", icon='ERROR')
-			if some_empty_refs == True:
-				row = layout.row()
-				row.label("Some Refs are not filled", icon='ERROR')
-			if some_own_ref == True:
-				row = layout.row()
-				row.label("Some bones are self-ref", icon='ERROR')
-		else:
-			pass
 
 class POSE_MT_JuAR_limb_specials(bpy.types.Menu):
 	bl_label = "Limb Specials"
