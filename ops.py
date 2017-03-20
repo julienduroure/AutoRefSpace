@@ -331,7 +331,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 
 		#Create UI file
 		if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py" in bpy.data.texts.keys():
-			bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py"])
+			bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py"], do_unlink=True)
 		text = bpy.data.texts.new(name=context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py")
 		text.use_module = True
 		text.write(ui_generated_text_)
@@ -345,7 +345,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 			txt = txt + "bpy.app.driver_namespace[\"driver_" + limb.id + "\"] =  driver_" + limb.id + "\n"
 
 		if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py" in bpy.data.texts.keys():
-			bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py"])
+			bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py"], do_unlink=True)
 		text = bpy.data.texts.new(name=context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py")
 		text.use_module = True
 		text.write(txt)
