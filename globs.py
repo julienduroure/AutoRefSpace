@@ -80,12 +80,9 @@ def cb_enum_update(self, context):
 			for bone in limb.ref_bones:
 				if constr.name == bone.constraint:
 					if bone.label == limb.enum:
-						#constr.influence = 1.0
-						#limb.current_bone = bone.name
 						# restore matrix
 						armature.pose.bones[bone.new_bone_name].matrix = armature.convert_space(armature.pose.bones[bone.new_bone_name], matrix, 'WORLD', 'POSE')
 					else:
-						#constr.influence = 0.0
 						pass
 
 		for constr in armature.pose.bones[limb.bone_target].constraints:
@@ -93,7 +90,6 @@ def cb_enum_update(self, context):
 				if constr.name == bone.constraint:
 					if bone.label == limb.enum:
 						constr.influence = 1.0
-						limb.current_bone = bone.name
 					else:
 						constr.influence = 0.0
 
@@ -262,7 +258,6 @@ def cb_active_AutoRefSpace(self, context):
 					if constr.name == bone.constraint:
 						if bone.label == limb.enum:
 							constr.influence = 1.0
-							limb.current_bone = bone.name
 						else:
 							constr.influence = 0.0
 
@@ -307,7 +302,6 @@ class LimbItem(bpy.types.PropertyGroup):
 	bone = bpy.props.StringProperty(name="Bone")
 	parent = bpy.props.StringProperty(name="Parent")
 	bone_target = bpy.props.StringProperty(name="Bone Target")
-	current_bone = bpy.props.StringProperty(name="Current Bone")
 
 	ref_bones = bpy.props.CollectionProperty(type=BoneItem)
 	active_ref_bone = bpy.props.IntProperty()

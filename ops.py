@@ -28,6 +28,164 @@ from .globs import *
 from .utils import *
 import uuid
 
+class POSE_OT_juar_generate_refspace_childof(bpy.types.Operator):
+	"""Generate RefSpace"""
+	bl_idname = "pose.juar_generate_refspace_childof"
+	bl_label = "Generate RefSpace"
+	bl_options = {'REGISTER'}
+
+
+	@classmethod
+	def poll(self, context):
+		return context.active_object and context.active_object.type == "ARMATURE" and len(context.active_object.juar_limbs) > 0 and context.mode == 'POSE'
+
+	def execute(self, context):
+		armature = context.active_object
+		limbs = armature.juar_limbs
+
+
+		for limb in limbs:
+			#Do not generate already generated limbs
+			if limb.generated == True:
+				continue
+
+			#Set default label if needed
+			for bone in limb.ref_bones:
+				if bone.label == "":
+					bone.label = bone.name
+
+			#Enable constraints or create them
+			if limb.active == True:
+				for bone in limb.ref_bones:
+					if bone.name == "":
+						continue
+					armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = False
+			else:
+				#create constraints
+				create_constraints(limb)
+
+				#Delete parent
+				bpy.ops.object.mode_set(mode='EDIT')
+				if armature.data.edit_bones[limb.bone].parent:
+					limb.parent = armature.data.edit_bones[limb.bone].parent.name
+				else:
+					limb.parent = ""
+				armature.data.edit_bones[limb.bone].parent = None
+				bpy.ops.object.mode_set(mode='POSE')
+
+		if context.active_object.juar_generation.panel_name == "":
+			context.active_object.juar_generation.panel_name =  addonpref().panel_name
+		if context.active_object.juar_generation.tab_tool == "":
+			context.active_object.juar_generation.tab_tool = addonpref().tab_tool
+
+		#Add rig_id custom prop if not exists, and assign a random value
+		if context.active_object.data.get('autorefspace_rig_id') is None:
+			bpy.context.active_object.data['autorefspace_rig_id'] = uuid.uuid4().hex
+		rig_id = context.active_object.data.get('autorefspace_rig_id')
+
+		ui_generated_text_ = ui_generated_text
+		ui_generated_text_ = ui_generated_text_.replace("###LABEL###", context.active_object.juar_generation.panel_name)
+		ui_generated_text_ = ui_generated_text_.replace("###REGION_TYPE###", context.active_object.juar_generation.view_location)
+		ui_generated_text_ = ui_generated_text_.replace("###CATEGORY###", context.active_object.juar_generation.tab_tool)
+		ui_generated_text_ = ui_generated_text_.replace("###rig_id###", rig_id )
+
+		#Create item lists
+		txt = ""
+		for limb in limbs:
+			cpt = 1
+			txt = txt + "items_" + limb.id + " = [\n"
+			for bone in limb.ref_bones:
+				if bone.name == "":
+					continue
+				txt = txt + "(\"" + bone.label + "\",\"" + bone.label + "\",\"\"," + str(cpt) + "),\n"
+				cpt = cpt + 1
+			txt = txt + "]\n"
+
+		ui_generated_text_ = ui_generated_text_.replace("###ITEM_LISTS###", txt )
+
+		#Create call back for choice of items
+		txt = ""
+		for limb in limbs:
+			txt = txt + "\tif self.name == \"" + limb.bone + "\":\n"
+			txt = txt + "\t\treturn items_" + limb.id + "\n"
+
+		ui_generated_text_ = ui_generated_text_.replace("###ITEM_CHOICE###", txt )
+
+		ui_generated_text_ = ui_generated_text_.replace("###REFSPACE_TAB###", str([limb.bone for limb in limbs]))
+
+		#Create enum label dict
+		txt = ""
+		for limb in limbs:
+			if limb.enum_label != "":
+				txt = txt + "\"" + limb.bone + "\" : \"" + limb.enum_label + "\",\n"
+			else:
+				txt = txt + "\"" + limb.bone + "\" : \"" + addonpref().enum_label + "\",\n"
+
+		ui_generated_text_ = ui_generated_text_.replace("###ENUM_LABELS###", txt)
+
+		#Create UI file
+		if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py" in bpy.data.texts.keys():
+			bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py"])
+		text = bpy.data.texts.new(name=context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py")
+		text.use_module = True
+		text.write(ui_generated_text_)
+		exec(text.as_string(), {})
+
+		#Create driver file
+		txt = driver_generated_text
+		for limb in limbs:
+			txt = txt + "def driver_" + limb.id + "(label, enum):\n"
+			txt = txt + "\treturn label == enum\n"
+			txt = txt + "bpy.app.driver_namespace[\"driver_" + limb.id + "\"] =  driver_" + limb.id + "\n"
+
+		if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py" in bpy.data.texts.keys():
+			bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py"])
+		text = bpy.data.texts.new(name=context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py")
+		text.use_module = True
+		text.write(txt)
+		exec(text.as_string(), {})
+
+		#add drivers
+		for limb in limbs:
+			if limb.generated == True:
+				continue
+			cpt_enum = 1
+			for bone in limb.ref_bones:
+				if bone.name == "":
+					continue
+				fcurve = armature.pose.bones[limb.bone].constraints[cpt_enum-1].driver_add('influence')
+				drv = fcurve.driver
+				drv.type = 'SCRIPTED'
+				drv.expression = "driver_" + limb.id + "(" + str(cpt_enum) + ", enum)"
+				var = drv.variables.new()
+				var.name = 'enum'
+				var.type = 'SINGLE_PROP'
+				targ = var.targets[0]
+				targ.id = armature
+				targ.data_path = "pose.bones[\"" + limb.bone + "\"].autorefspace_enum"
+				cpt_enum = cpt_enum + 1
+
+		for limb in limbs:
+			if limb.generated == True:
+				continue
+			#Set default value
+			armature.data.bones.active = armature.data.bones[limb.bone]
+			if limb.ref_bones[limb.active_ref_bone].label != "":
+				armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[limb.active_ref_bone].label
+			else:
+				for i in range(len(limb.ref_bones)):
+					if limb.ref_bones[i].label != "":
+						armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[i].label
+						break
+
+			#Set generate flag
+			limb.generated = True
+
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.object.mode_set(mode='POSE')
+
+		return {'FINISHED'}
+
 class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 	"""Generate RefSpace"""
 	bl_idname = "pose.juar_generate_refspace"
@@ -43,153 +201,196 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 		armature = context.active_object
 		limbs = armature.juar_limbs
 
-		if addonpref().juar_mode == "CHILDOF":
 
-			for limb in limbs:
-				#Do not generate already generated limbs
-				if limb.generated == True:
-					continue
+		for limb in limbs:
+			#Do not generate already generated limbs
+			if limb.generated == True:
+				continue
 
-				#Set default label if needed
+			#Set default label if needed
+			for bone in limb.ref_bones:
+				if bone.label == "":
+					bone.label = bone.name
+
+			#Enable constraints or create them
+			if limb.active == True:
 				for bone in limb.ref_bones:
-					if bone.label == "":
-						bone.label = bone.name
+					if bone.name == "":
+						continue
+					armature.pose.bones[bone.name].constraints.get(bone.constraint).mute = False
+			else:
+				#Store Parent
+				bpy.ops.object.mode_set(mode='EDIT')
+				if armature.data.edit_bones[limb.bone].parent:
+					limb.parent = armature.data.edit_bones[limb.bone].parent.name
+				else:
+					limb.parent = ""
 
-				#Enable constraints or create them
-				if limb.active == True:
+				# Create corresponding bones
+				bpy.ops.object.mode_set(mode='EDIT')
+				new_ = armature.data.edit_bones.new("target_" + limb.bone)
+				new_name = new_.name
+				armature.data.edit_bones[new_name].head = armature.data.edit_bones[limb.bone].head
+				armature.data.edit_bones[new_name].tail = armature.data.edit_bones[limb.bone].tail
+				armature.data.edit_bones[new_name].roll = armature.data.edit_bones[limb.bone].roll
+				limb.bone_target = new_name
+				new_.parent = armature.data.edit_bones[limb.bone].parent
+
+				armature.data.edit_bones[limb.bone].parent = new_
+				for bone in limb.ref_bones:
+					new_ = armature.data.edit_bones.new(limb.bone + "_" + bone.name)
+					new_name = new_.name
+					armature.data.edit_bones[new_name].head = armature.data.edit_bones[limb.bone].head
+					armature.data.edit_bones[new_name].tail = armature.data.edit_bones[limb.bone].tail
+					armature.data.edit_bones[new_name].roll = armature.data.edit_bones[limb.bone].roll
+					bone.new_bone_name = new_name
+					new_.parent = armature.data.edit_bones[bone.name]
+				bpy.ops.object.mode_set(mode='POSE')
+
+				for bone in limb.ref_bones:
+					armature.data.bones[bone.new_bone_name].hide = True
+				armature.data.bones[limb.bone_target].hide = True
+				#create constraints
+				create_transform_contraints(limb)
+
+				#activate constraints (by setting influence to 1)
+				for constr in armature.pose.bones[limb.bone_target].constraints:
 					for bone in limb.ref_bones:
-						if bone.name == "":
-							continue
-						armature.pose.bones[limb.bone].constraints.get(bone.constraint).mute = False
-				else:
-					#create constraints
-					create_constraints(limb)
+						if constr.name == bone.constraint:
+							constr.influence = 1.0
 
-					#Delete parent
-					bpy.ops.object.mode_set(mode='EDIT')
-					if armature.data.edit_bones[limb.bone].parent:
-						limb.parent = armature.data.edit_bones[limb.bone].parent.name
-					else:
-						limb.parent = ""
-					armature.data.edit_bones[limb.bone].parent = None
-					bpy.ops.object.mode_set(mode='POSE')
+		if context.active_object.juar_generation.panel_name == "":
+			context.active_object.juar_generation.panel_name =  addonpref().panel_name
+		if context.active_object.juar_generation.tab_tool == "":
+			context.active_object.juar_generation.tab_tool = addonpref().tab_tool
 
-			if context.active_object.juar_generation.panel_name == "":
-				context.active_object.juar_generation.panel_name =  addonpref().panel_name
-			if context.active_object.juar_generation.tab_tool == "":
-				context.active_object.juar_generation.tab_tool = addonpref().tab_tool
+		#Add rig_id custom prop if not exists, and assign a random value
+		if context.active_object.data.get('autorefspace_rig_id') is None:
+			bpy.context.active_object.data['autorefspace_rig_id'] = uuid.uuid4().hex
+		rig_id = context.active_object.data.get('autorefspace_rig_id')
 
-			#Add rig_id custom prop if not exists, and assign a random value
-			if context.active_object.data.get('autorefspace_rig_id') is None:
-				bpy.context.active_object.data['autorefspace_rig_id'] = uuid.uuid4().hex
-			rig_id = context.active_object.data.get('autorefspace_rig_id')
+		ui_generated_text_ = ui_generated_text
+		ui_generated_text_ = ui_generated_text_.replace("###LABEL###", context.active_object.juar_generation.panel_name)
+		ui_generated_text_ = ui_generated_text_.replace("###REGION_TYPE###", context.active_object.juar_generation.view_location)
+		ui_generated_text_ = ui_generated_text_.replace("###CATEGORY###", context.active_object.juar_generation.tab_tool)
+		ui_generated_text_ = ui_generated_text_.replace("###rig_id###", rig_id )
 
-			ui_generated_text_ = ui_generated_text
-			ui_generated_text_ = ui_generated_text_.replace("###LABEL###", context.active_object.juar_generation.panel_name)
-			ui_generated_text_ = ui_generated_text_.replace("###REGION_TYPE###", context.active_object.juar_generation.view_location)
-			ui_generated_text_ = ui_generated_text_.replace("###CATEGORY###", context.active_object.juar_generation.tab_tool)
-			ui_generated_text_ = ui_generated_text_.replace("###rig_id###", rig_id )
-
-			#Create item lists
-			txt = ""
-			for limb in limbs:
-				cpt = 1
-				txt = txt + "items_" + limb.id + " = [\n"
-				for bone in limb.ref_bones:
-					if bone.name == "":
-						continue
-					txt = txt + "(\"" + bone.label + "\",\"" + bone.label + "\",\"\"," + str(cpt) + "),\n"
-					cpt = cpt + 1
-				txt = txt + "]\n"
-
-			ui_generated_text_ = ui_generated_text_.replace("###ITEM_LISTS###", txt )
-
-			#Create call back for choice of items
-			txt = ""
-			for limb in limbs:
-				txt = txt + "\tif self.name == \"" + limb.bone + "\":\n"
-				txt = txt + "\t\treturn items_" + limb.id + "\n"
-
-			ui_generated_text_ = ui_generated_text_.replace("###ITEM_CHOICE###", txt )
-
-			ui_generated_text_ = ui_generated_text_.replace("###REFSPACE_TAB###", str([limb.bone for limb in limbs]))
-
-			#Create enum label dict
-			txt = ""
-			for limb in limbs:
-				if limb.enum_label != "":
-					txt = txt + "\"" + limb.bone + "\" : \"" + limb.enum_label + "\",\n"
-				else:
-					txt = txt + "\"" + limb.bone + "\" : \"" + addonpref().enum_label + "\",\n"
-
-			ui_generated_text_ = ui_generated_text_.replace("###ENUM_LABELS###", txt)
-
-			#Create UI file
-			if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py" in bpy.data.texts.keys():
-				bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py"])
-			text = bpy.data.texts.new(name=context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py")
-			text.use_module = True
-			text.write(ui_generated_text_)
-			exec(text.as_string(), {})
-
-			#Create driver file
-			txt = driver_generated_text
-			for limb in limbs:
-				txt = txt + "def driver_" + limb.id + "(label, enum):\n"
-				txt = txt + "\treturn label == enum\n"
-				txt = txt + "bpy.app.driver_namespace[\"driver_" + limb.id + "\"] =  driver_" + limb.id + "\n"
-
-			if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py" in bpy.data.texts.keys():
-				bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py"])
-			text = bpy.data.texts.new(name=context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py")
-			text.use_module = True
-			text.write(txt)
-			exec(text.as_string(), {})
-
-			#add drivers
-			for limb in limbs:
-				if limb.generated == True:
+		#Create item lists
+		txt = ""
+		for limb in limbs:
+			cpt = 1
+			txt = txt + "items_" + limb.id + " = [\n"
+			for bone in limb.ref_bones:
+				if bone.name == "":
 					continue
-				cpt_enum = 1
-				for bone in limb.ref_bones:
-					if bone.name == "":
-						continue
-					fcurve = armature.pose.bones[limb.bone].constraints[cpt_enum-1].driver_add('influence')
-					drv = fcurve.driver
-					drv.type = 'SCRIPTED'
-					drv.expression = "driver_" + limb.id + "(" + str(cpt_enum) + ", enum)"
-					var = drv.variables.new()
-					var.name = 'enum'
-					var.type = 'SINGLE_PROP'
-					targ = var.targets[0]
-					targ.id = armature
-					targ.data_path = "pose.bones[\"" + limb.bone + "\"].autorefspace_enum"
-					cpt_enum = cpt_enum + 1
+				txt = txt + "(\"" + bone.label + "\",\"" + bone.label + "\",\"\"," + str(cpt) + "),\n"
+				cpt = cpt + 1
+			txt = txt + "]\n"
 
-			for limb in limbs:
-				if limb.generated == True:
+		ui_generated_text_ = ui_generated_text_.replace("###ITEM_LISTS###", txt )
+
+
+		# create call back for an item
+		txt = ""
+		#Create call back item list
+		txt = txt + "def cb_item_change(self, context):\n"
+		for limb in limbs:
+			txt = txt + "\tif self.name == \"" + limb.bone + "\":\n"
+			tab = []
+			for bone in limb.ref_bones:
+				tab.append(bone.new_bone_name)
+			txt = txt + "\t\ttab_ = " + str(tab) + "\n"
+			txt = txt + "\t\treturn items_cb(self, context, \"" + limb.bone_target  + "\", tab_)\n"
+
+		txt = txt + "def items_cb(self, context, target_, tab):\n"
+		txt = txt + call_back_text
+
+		ui_generated_text_ = ui_generated_text_.replace("###ITEMS_UPDATE_CB_LIST###", txt )
+
+
+		#Create call back for choice of items
+		txt = ""
+		for limb in limbs:
+			txt = txt + "\tif self.name == \"" + limb.bone + "\":\n"
+			txt = txt + "\t\treturn items_" + limb.id + "\n"
+
+		ui_generated_text_ = ui_generated_text_.replace("###ITEM_CHOICE###", txt )
+
+
+		ui_generated_text_ = ui_generated_text_.replace("###REFSPACE_TAB###", str([limb.bone for limb in limbs]))
+
+		#Create enum label dict
+		txt = ""
+		for limb in limbs:
+			if limb.enum_label != "":
+				txt = txt + "\"" + limb.bone + "\" : \"" + limb.enum_label + "\",\n"
+			else:
+				txt = txt + "\"" + limb.bone + "\" : \"" + addonpref().enum_label + "\",\n"
+
+		ui_generated_text_ = ui_generated_text_.replace("###ENUM_LABELS###", txt)
+
+		#Create UI file
+		if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py" in bpy.data.texts.keys():
+			bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py"])
+		text = bpy.data.texts.new(name=context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py")
+		text.use_module = True
+		text.write(ui_generated_text_)
+		exec(text.as_string(), {})
+
+		#Create driver file
+		txt = driver_generated_text
+		for limb in limbs:
+			txt = txt + "def driver_" + limb.id + "(label, enum):\n"
+			txt = txt + "\treturn label == enum\n"
+			txt = txt + "bpy.app.driver_namespace[\"driver_" + limb.id + "\"] =  driver_" + limb.id + "\n"
+
+		if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py" in bpy.data.texts.keys():
+			bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py"])
+		text = bpy.data.texts.new(name=context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py")
+		text.use_module = True
+		text.write(txt)
+		exec(text.as_string(), {})
+
+
+		#add drivers
+		for limb in limbs:
+			if limb.generated == True:
+				continue
+			cpt_enum = 1
+			for bone in limb.ref_bones:
+				if bone.name == "":
 					continue
-				#Set default value
-				armature.data.bones.active = armature.data.bones[limb.bone]
-				if limb.ref_bones[limb.active_ref_bone].label != "":
-					armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[limb.active_ref_bone].label
-				else:
-					for i in range(len(limb.ref_bones)):
-						if limb.ref_bones[i].label != "":
-							armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[i].label
-							break
+				fcurve = armature.pose.bones[limb.bone_target].constraints[cpt_enum-1].driver_add('influence')
+				drv = fcurve.driver
+				drv.type = 'SCRIPTED'
+				drv.expression = "driver_" + limb.id + "(" + str(cpt_enum) + ", enum)"
+				var = drv.variables.new()
+				var.name = 'enum'
+				var.type = 'SINGLE_PROP'
+				targ = var.targets[0]
+				targ.id = armature
+				targ.data_path = "pose.bones[\"" + limb.bone + "\"][\"autorefspace_enum\"]"
+				cpt_enum = cpt_enum + 1
 
-				#Set generate flag
-				limb.generated = True
+		for limb in limbs:
+			if limb.generated == True:
+				continue
+			#Set default value
+			armature.data.bones.active = armature.data.bones[limb.bone]
+			if limb.ref_bones[limb.active_ref_bone].label != "":
+				armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[limb.active_ref_bone].label
+			else:
+				for i in range(len(limb.ref_bones)):
+					if limb.ref_bones[i].label != "":
+						armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[i].label
+						break
 
-			bpy.ops.object.mode_set(mode='EDIT')
-			bpy.ops.object.mode_set(mode='POSE')
+			#Set generate flag
+			limb.generated = True
 
-		elif addonpref().juar_mode == "TRANSFORM":
-			pass
-		else:
-			pass
 
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.object.mode_set(mode='POSE')
 
 		return {'FINISHED'}
 
@@ -284,10 +485,12 @@ class POSE_OT_juar_limb_copy(bpy.types.Operator):
 
 def register():
 	bpy.utils.register_class(POSE_OT_juar_generate_refspace)
+	bpy.utils.register_class(POSE_OT_juar_generate_refspace_childof)
 	bpy.utils.register_class(POSE_OT_juar_update_refspace)
 	bpy.utils.register_class(POSE_OT_juar_limb_copy)
 
 def unregister():
 	bpy.utils.unregister_class(POSE_OT_juar_generate_refspace)
+	bpy.utils.unregister_class(POSE_OT_juar_generate_refspace_childof)
 	bpy.utils.unregister_class(POSE_OT_juar_update_refspace)
 	bpy.utils.unregister_class(POSE_OT_juar_limb_copy)

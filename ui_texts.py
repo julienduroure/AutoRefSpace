@@ -32,28 +32,30 @@ autorefspace_rig_id = "###rig_id###"
 def cb_enum_items(self, context):
 ###ITEM_CHOICE###
 
-bpy.types.PoseBone.autorefspace_enum = bpy.props.EnumProperty(name = 'enum', items=cb_enum_items)
+###ITEMS_UPDATE_CB_LIST###
+
+bpy.types.PoseBone.autorefspace_enum = bpy.props.EnumProperty(name = 'enum', items=cb_enum_items, update=cb_item_change)
 
 class POSE_PT_JuAR_AutoRefSpace_###rig_id###(bpy.types.Panel):
 	bl_label = "###LABEL###"
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = '###REGION_TYPE###'
 	bl_category = "###CATEGORY###"
-	
+
 	@classmethod
 	def poll(self, context):
 		return context.active_object and context.active_object.type == "ARMATURE" and context.active_object.data.get("autorefspace_rig_id") is not None and context.active_object.data.get("autorefspace_rig_id") == autorefspace_rig_id and context.mode == 'POSE'
-		
-			
+
+
 	def draw(self, context):
 		layout = self.layout
 		armature = context.object
-		
+
 		refspace_tab = ###REFSPACE_TAB###
 		enum_name = {
-###ENUM_LABELS###		
+###ENUM_LABELS###
 		}
-		
+
 		for bone in refspace_tab:
 			if bone in [b.name for b in context.selected_pose_bones]:
 				row = layout.row()
@@ -61,11 +63,49 @@ class POSE_PT_JuAR_AutoRefSpace_###rig_id###(bpy.types.Panel):
 
 def register():
 	bpy.utils.register_class(POSE_PT_JuAR_AutoRefSpace_###rig_id###)
-	
+
 def unregister():
 	bpy.utils.unregister_class(POSE_PT_JuAR_AutoRefSpace_###rig_id###)
 
 register()
+'''
+
+call_back_text = '''
+	matrix = context.object.convert_space(context.object.pose.bones[target_], context.object.pose.bones[target_].matrix, 'POSE', 'WORLD')
+	for bone in tab:
+		context.object.pose.bones[bone].matrix = context.object.convert_space(context.object.pose.bones[bone], matrix, 'WORLD', 'POSE')
+
+    #store current keying set if any
+	current_keying_set = context.scene.keying_sets.active_index
+
+	# Set Keying set
+	context.scene.keying_sets.active = context.scene.keying_sets_all['LocRotScale']
+
+	# Store current selection
+	current_selection = []
+	for bone in context.object.data.bones:
+		if bone.select == True:
+			current_selection.append(bone.name)
+			bone.select = False
+
+	for bone in tab:
+		context.object.data.bones[bone].select = True
+		context.object.data.bones[bone].hide = False
+
+	# Insert Keyframe
+	bpy.ops.anim.keyframe_insert(type='__ACTIVE__')
+
+	# Restore keyframe
+	context.scene.keying_sets.active_index = current_keying_set
+
+	#Restore selection
+	for bone in context.object.data.bones:
+		bone.select = False
+		if bone.name in current_selection:
+			bone.select = True
+
+	for bone in tab:
+		context.object.data.bones[bone].hide = True
 '''
 
 
