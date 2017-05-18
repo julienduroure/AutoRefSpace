@@ -55,13 +55,8 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 				if bone.label == "":
 					bone.label = bone.name
 
-			#Enable constraints or create them
-			if limb.active == True:
-				for bone in limb.ref_bones:
-					if bone.name == "":
-						continue
-					armature.pose.bones[bone.name].constraints.get(bone.constraint).mute = False
-			else:
+			#Check if current limb is active
+			if limb.active == False:
 				#Store Parent
 				bpy.ops.object.mode_set(mode='EDIT')
 				if armature.data.edit_bones[limb.bone].parent:
