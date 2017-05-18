@@ -39,9 +39,6 @@ class JuAR_Preferences(bpy.types.AddonPreferences):
 
 	def draw(self, context):
 		layout = self.layout
-		row_global = layout.row()
-
-		row_global.prop(self, "juar_mode")
 
 		row_global = layout.row()
 		col = row_global.column()

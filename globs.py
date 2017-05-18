@@ -159,6 +159,10 @@ def cb_active_AutoRefSpace(self, context):
 						constr.influence = 0.0
 
 	else:
+		#first check to know if we are at initialisation of limb (when copy/copy mirror)
+		if len([bone for bone in limb.ref_bones if bone.new_bone_name == ""]) != 0:
+			return None
+
 		#Reset parent of bone
 		bpy.ops.object.mode_set(mode='EDIT')
 		if limb.parent != "":
