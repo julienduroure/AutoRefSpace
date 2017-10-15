@@ -144,8 +144,8 @@ def cb_active_AutoRefSpace(self, context):
 		bpy.ops.object.mode_set(mode='POSE')
 
 		for bone in limb.ref_bones:
-			armature.data.bones[bone.new_bone_name].hide = True
-		armature.data.bones[limb.bone_target].hide = True
+			armature.data.bones[bone.new_bone_name].hide_select = True
+		armature.data.bones[limb.bone_target].hide_select = True
 
 		# Create constraints
 		create_constraints(limb)
