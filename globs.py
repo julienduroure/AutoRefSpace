@@ -27,6 +27,9 @@ import bpy
 from .utils import *
 from .ui import*
 
+from mathutils import Vector
+from mathutils import Quaternion
+
 def update_panel(self, context):
 	bpy.utils.unregister_class(POSE_PT_juar_AutoRefSpace_Limbs)
 	bpy.utils.unregister_class(POSE_PT_juar_LimbDetail)
@@ -67,6 +70,8 @@ def cb_enum_update(self, context):
 				if bone.label == limb.enum:
 					# restore matrix
 					armature.pose.bones[bone.new_bone_name].matrix = armature.convert_space(armature.pose.bones[bone.new_bone_name], matrix, 'WORLD', 'POSE')
+					armature.data.bones[bone.new_bone_name].hide_select = False
+					armature.data.bones[bone.new_bone_name].hide = False
 				else:
 					pass
 
@@ -76,6 +81,16 @@ def cb_enum_update(self, context):
 				if bone.label == limb.enum:
 					constr.influence = 1.0
 				else:
+					if constr.influence == 1.0:
+						#This was old value. Need to reset LocRotScale on corresponding bone
+						# Constraint name starts "AutoRefSpace ", following by old property value
+						bone.new_bone_name
+						armature.pose.bones[bone.new_bone_name].location = Vector()
+						armature.pose.bones[bone.new_bone_name].rotation_quaternion = Quaternion((1.0, 0.0, 0.0, 0.0))
+						armature.pose.bones[bone.new_bone_name].scale = Vector((1.0, 1.0, 1.0))
+						armature.data.bones[bone.new_bone_name].hide_select = True
+						armature.data.bones[bone.new_bone_name].hide = True
+					# reset contraint influence on old one
 					constr.influence = 0.0
 
 def create_constraints(limb):
@@ -124,7 +139,7 @@ def cb_active_AutoRefSpace(self, context):
 			limb.parent = ""
 
 		# Create corresponding bones
-		new_ = armature.data.edit_bones.new("juas_target_" + limb.bone)
+		new_ = armature.data.edit_bones.new("juar_target_" + limb.bone)
 		new_name = new_.name
 		armature.data.edit_bones[new_name].head = armature.data.edit_bones[limb.bone].head
 		armature.data.edit_bones[new_name].tail = armature.data.edit_bones[limb.bone].tail
@@ -134,7 +149,7 @@ def cb_active_AutoRefSpace(self, context):
 
 		armature.data.edit_bones[limb.bone].parent = new_
 		for bone in limb.ref_bones:
-			new_ = armature.data.edit_bones.new("juas_" + bone.name + "_" + limb.bone)
+			new_ = armature.data.edit_bones.new("juar_" + bone.name + "_" + limb.bone)
 			new_name = new_.name
 			armature.data.edit_bones[new_name].head = armature.data.edit_bones[limb.bone].head
 			armature.data.edit_bones[new_name].tail = armature.data.edit_bones[limb.bone].tail
@@ -145,8 +160,10 @@ def cb_active_AutoRefSpace(self, context):
 
 		for bone in limb.ref_bones:
 			armature.data.bones[bone.new_bone_name].hide_select = True
+			armature.data.bones[bone.new_bone_name].hide = True
 			armature.data.bones[bone.new_bone_name].layers = addonpref().bone_layer
 		armature.data.bones[limb.bone_target].hide_select = True
+		armature.data.bones[limb.bone_target].hide = True
 		armature.data.bones[limb.bone_target].layers = addonpref().bone_layer
 
 		# Create constraints
@@ -158,6 +175,8 @@ def cb_active_AutoRefSpace(self, context):
 				if constr.name == bone.constraint:
 					if bone.label == limb.enum:
 						constr.influence = 1.0
+						armature.data.bones[bone.new_bone_name].hide_select = False
+						armature.data.bones[bone.new_bone_name].hide = False
 					else:
 						constr.influence = 0.0
 

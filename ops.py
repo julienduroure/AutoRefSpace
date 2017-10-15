@@ -67,7 +67,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 
 				# Create corresponding bones
 				bpy.ops.object.mode_set(mode='EDIT')
-				new_ = armature.data.edit_bones.new("juas_target_" + limb.bone)
+				new_ = armature.data.edit_bones.new("juar_target_" + limb.bone)
 				new_name = new_.name
 				armature.data.edit_bones[new_name].head = armature.data.edit_bones[limb.bone].head
 				armature.data.edit_bones[new_name].tail = armature.data.edit_bones[limb.bone].tail
@@ -77,7 +77,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 
 				armature.data.edit_bones[limb.bone].parent = new_
 				for bone in limb.ref_bones:
-					new_ = armature.data.edit_bones.new("juas_" + bone.name + "_" + limb.bone)
+					new_ = armature.data.edit_bones.new("juar_" + bone.name + "_" + limb.bone)
 					new_name = new_.name
 					armature.data.edit_bones[new_name].head = armature.data.edit_bones[limb.bone].head
 					armature.data.edit_bones[new_name].tail = armature.data.edit_bones[limb.bone].tail
@@ -88,7 +88,10 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 
 				for bone in limb.ref_bones:
 					armature.data.bones[bone.new_bone_name].hide_select = True
+					armature.data.bones[bone.new_bone_name].hide = True
 				armature.data.bones[limb.bone_target].hide_select = True
+				armature.data.bones[limb.bone_target].hide = True
+
 				#create constraints
 				create_constraints(limb)
 
@@ -97,6 +100,12 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 					for bone in limb.ref_bones:
 						if constr.name == bone.constraint:
 							constr.influence = 1.0
+
+			for constr in armature.pose.bones[limb.bone_target].constraints:
+				for bone in limb.ref_bones:
+					if constr.name == bone.constraint:
+						armature.data.bones[bone.new_bone_name].hide = False
+						armature.data.bones[bone.new_bone_name].hide_select = False
 
 		if context.active_object.juar_generation.panel_name == "":
 			context.active_object.juar_generation.panel_name =  addonpref().panel_name
@@ -141,7 +150,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 			txt = txt + "\t\ttab_ = " + str(tab) + "\n"
 			txt = txt + "\t\treturn items_cb(self, context, \"" + limb.bone_target  + "\", tab_)\n"
 
-		txt = txt + "def items_cb(self, context, target_, tab):\n"
+		txt = txt + "\ndef items_cb(self, context, target_, tab):\n"
 		txt = txt + call_back_text
 
 		ui_generated_text_ = ui_generated_text_.replace("###ITEMS_UPDATE_CB_LIST###", txt )
@@ -183,6 +192,11 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 			txt = txt + "\treturn label == enum\n"
 			txt = txt + "bpy.app.driver_namespace[\"driver_" + limb.id + "\"] =  driver_" + limb.id + "\n"
 
+			txt = txt + "\n"
+			txt = txt + "def driver_inv_" + limb.id + "(label, enum):\n"
+			txt = txt + "\treturn label != enum\n"
+			txt = txt + "bpy.app.driver_namespace[\"driver_inv_" + limb.id + "\"] =  driver_inv_" + limb.id + "\n"
+
 		if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py" in bpy.data.texts.keys():
 			bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py"], do_unlink=True)
 		text = bpy.data.texts.new(name=context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py")
@@ -209,6 +223,31 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 				targ = var.targets[0]
 				targ.id = armature
 				targ.data_path = "pose.bones[\"" + limb.bone + "\"][\"autorefspace_enum\"]"
+
+				#add driver on hide / selectability
+				bone = armature.pose.bones[limb.bone_target].constraints[cpt_enum-1].subtarget
+				fcurve = armature.data.bones[bone].driver_add('hide')
+				drv = fcurve.driver
+				drv.type = 'SCRIPTED'
+				drv.expression = "driver_inv_" + limb.id + "(" + str(cpt_enum) + ", enum)"
+				var = drv.variables.new()
+				var.name = 'enum'
+				var.type = 'SINGLE_PROP'
+				targ = var.targets[0]
+				targ.id = armature
+				targ.data_path = "pose.bones[\"" + limb.bone + "\"][\"autorefspace_enum\"]"
+
+				fcurve = armature.data.bones[bone].driver_add('hide_select')
+				drv = fcurve.driver
+				drv.type = 'SCRIPTED'
+				drv.expression = "driver_inv_" + limb.id + "(" + str(cpt_enum) + ", enum)"
+				var = drv.variables.new()
+				var.name = 'enum'
+				var.type = 'SINGLE_PROP'
+				targ = var.targets[0]
+				targ.id = armature
+				targ.data_path = "pose.bones[\"" + limb.bone + "\"][\"autorefspace_enum\"]"
+
 				cpt_enum = cpt_enum + 1
 
 		for limb in limbs:
@@ -262,6 +301,8 @@ class POSE_OT_juar_update_refspace(bpy.types.Operator):
 			if bone.name == "":
 				continue
 			armature.pose.bones[limb.bone_target].constraints.get(bone.constraint).driver_remove('influence')
+			armature.data.bones[armature.pose.bones[limb.bone_target].constraints.get(bone.constraint).subtarget].driver_remove('hide')
+			armature.data.bones[armature.pose.bones[limb.bone_target].constraints.get(bone.constraint).subtarget].driver_remove('hide_select')
 
 		#This will delete constraints
 		limb.active = False
