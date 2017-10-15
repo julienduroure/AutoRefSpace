@@ -76,7 +76,7 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 
 				armature.data.edit_bones[limb.bone].parent = new_
 				for bone in limb.ref_bones:
-					new_ = armature.data.edit_bones.new("juas_" + limb.bone + "_" + bone.name)
+					new_ = armature.data.edit_bones.new("juas_" + bone.name + "_" + limb.bone)
 					new_name = new_.name
 					armature.data.edit_bones[new_name].head = armature.data.edit_bones[limb.bone].head
 					armature.data.edit_bones[new_name].tail = armature.data.edit_bones[limb.bone].tail
