@@ -145,7 +145,9 @@ def cb_active_AutoRefSpace(self, context):
 
 		for bone in limb.ref_bones:
 			armature.data.bones[bone.new_bone_name].hide_select = True
+			armature.data.bones[bone.new_bone_name].layers = addonpref().bone_layer
 		armature.data.bones[limb.bone_target].hide_select = True
+		armature.data.bones[limb.bone_target].layers = addonpref().bone_layer
 
 		# Create constraints
 		create_constraints(limb)

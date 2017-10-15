@@ -36,6 +36,8 @@ class JuAR_Preferences(bpy.types.AddonPreferences):
 	sides = bpy.props.CollectionProperty(type=JuAR_SideItem)
 	active_side = bpy.props.IntProperty()
 
+	bone_layer = bpy.props.BoolVectorProperty(name="Bone layer", subtype='LAYER', size = 32)
+
 	category = bpy.props.StringProperty(name="Category", default="AutoRefSpace", update=update_panel)
 
 	def draw(self, context):
@@ -73,6 +75,9 @@ class JuAR_Preferences(bpy.types.AddonPreferences):
 
 		else:
 			row.operator("pose.juar_side_init", text="Init sides, for mirror")
+
+		row = layout.row()
+		row.prop(self, "bone_layer")
 
 
 
