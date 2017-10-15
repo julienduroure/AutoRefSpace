@@ -123,7 +123,7 @@ def cb_active_AutoRefSpace(self, context):
 			limb.parent = ""
 
 		# Create corresponding bones
-		new_ = armature.data.edit_bones.new("target_" + limb.bone)
+		new_ = armature.data.edit_bones.new("juas_target_" + limb.bone)
 		new_name = new_.name
 		armature.data.edit_bones[new_name].head = armature.data.edit_bones[limb.bone].head
 		armature.data.edit_bones[new_name].tail = armature.data.edit_bones[limb.bone].tail
@@ -133,7 +133,7 @@ def cb_active_AutoRefSpace(self, context):
 
 		armature.data.edit_bones[limb.bone].parent = new_
 		for bone in limb.ref_bones:
-			new_ = armature.data.edit_bones.new(bone.name + "_" + limb.bone)
+			new_ = armature.data.edit_bones.new("juas_" + bone.name + "_" + limb.bone)
 			new_name = new_.name
 			armature.data.edit_bones[new_name].head = armature.data.edit_bones[limb.bone].head
 			armature.data.edit_bones[new_name].tail = armature.data.edit_bones[limb.bone].tail
