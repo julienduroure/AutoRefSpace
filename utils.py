@@ -2,6 +2,7 @@
 #	GPL LICENSE:
 #-------------------------
 # This file is part of AutoRefSpace.
+# AutoRefSpace is part of http://BleRiFa.com
 #
 #    AutoRefSpace is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
