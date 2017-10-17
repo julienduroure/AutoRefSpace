@@ -296,41 +296,44 @@ class POSE_OT_juar_update_refspace(bpy.types.Operator):
 		limbs = armature.juar_limbs
 		limb  = limbs[armature.juar_active_limb]
 
+		for limb in limbs:
+			#Delete keyframes on bones
+			if bpy.context.active_object.animation_data and bpy.context.active_object.animation_data.action:
+				curves = bpy.context.active_object.animation_data.action.fcurves
+				for c in curves:
+					if c.data_path[:11] == "pose.bones[" and c.data_path[12:].split('"')[0] in [b.new_bone_name for b in limb.ref_bones]:
+						bpy.context.active_object.animation_data.action.fcurves.remove(c)
 
-		#Delete keyframes on bones
-		if bpy.context.active_object.animation_data and bpy.context.active_object.animation_data.action:
-			curves = bpy.context.active_object.animation_data.action.fcurves
-			for c in curves:
-				if c.data_path[:11] == "pose.bones[" and c.data_path[12:].split('"')[0] in [b.new_bone_name for b in limb.ref_bones]:
-					bpy.context.active_object.animation_data.action.fcurves.remove(c)
+			# delete drivers
+			for bone in limb.ref_bones:
+				if bone.name == "":
+					continue
+				armature.pose.bones[limb.bone_target].constraints.get(bone.constraint).driver_remove('influence')
+				armature.data.bones[armature.pose.bones[limb.bone_target].constraints.get(bone.constraint).subtarget].driver_remove('hide')
+				armature.data.bones[armature.pose.bones[limb.bone_target].constraints.get(bone.constraint).subtarget].driver_remove('hide_select')
 
-		# delete drivers
-		for bone in limb.ref_bones:
-			if bone.name == "":
-				continue
-			armature.pose.bones[limb.bone_target].constraints.get(bone.constraint).driver_remove('influence')
-			armature.data.bones[armature.pose.bones[limb.bone_target].constraints.get(bone.constraint).subtarget].driver_remove('hide')
-			armature.data.bones[armature.pose.bones[limb.bone_target].constraints.get(bone.constraint).subtarget].driver_remove('hide_select')
+			#This will delete constraints
+			limb.active = False
 
-		#This will delete constraints
-		limb.active = False
+			if bpy.context.active_object.animation_data and bpy.context.active_object.animation_data.action:
+				curves = bpy.context.active_object.animation_data.action.fcurves
+				for c in curves:
+					if c.data_path.split('.')[len(c.data_path.split('.'))-1] == "autorefspace_enum":
+						bpy.context.active_object.animation_data.action.fcurves.remove(c)
 
-		if bpy.context.active_object.animation_data and bpy.context.active_object.animation_data.action:
-			curves = bpy.context.active_object.animation_data.action.fcurves
-			for c in curves:
-				if c.data_path.split('.')[len(c.data_path.split('.'))-1] == "autorefspace_enum":
-					bpy.context.active_object.animation_data.action.fcurves.remove(c)
+			#Delete keyframes on enum
+			if bpy.context.active_object.animation_data and bpy.context.active_object.animation_data.action:
+				curves = bpy.context.active_object.animation_data.action.fcurves
+				for c in curves:
+					if c.data_path.split('.')[len(c.data_path.split('.'))-1] == "autorefspace_enum":
+						bpy.context.active_object.animation_data.action.fcurves.remove(c)
+						break
 
-		#Delete keyframes on enum
-		if bpy.context.active_object.animation_data and bpy.context.active_object.animation_data.action:
-			curves = bpy.context.active_object.animation_data.action.fcurves
-			for c in curves:
-				if c.data_path.split('.')[len(c.data_path.split('.'))-1] == "autorefspace_enum":
-					bpy.context.active_object.animation_data.action.fcurves.remove(c)
-					break
+			# Delete enum
+			del armature.pose.bones[limb.bone]['autorefspace_enum']
 
-		#Enable live ref space
-		limb.generated = False
+			#Enable live ref space
+			limb.generated = Falses
 
 		return {'FINISHED'}
 
