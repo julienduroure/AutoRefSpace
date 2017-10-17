@@ -333,7 +333,10 @@ class POSE_OT_juar_update_refspace(bpy.types.Operator):
 			del armature.pose.bones[limb.bone]['autorefspace_enum']
 
 			#Enable live ref space
-			limb.generated = Falses
+			limb.generated = False
+
+		if "WGT_juar_ref" in  bpy.data.objects:
+			bpy.data.objects.remove(bpy.data.objects["WGT_juar_ref"], do_unlink=True)
 
 		return {'FINISHED'}
 
