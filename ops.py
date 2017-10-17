@@ -28,6 +28,7 @@ from .ui_texts import *
 from .globs import *
 from .utils import *
 import uuid
+from mathutils import Vector
 
 
 class POSE_OT_juar_generate_refspace(bpy.types.Operator):
@@ -85,6 +86,13 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 					bone.new_bone_name = new_name
 					new_.parent = armature.data.edit_bones[bone.name]
 				bpy.ops.object.mode_set(mode='POSE')
+
+				# Setting shape
+				obj = get_wgt_obj()
+				for bone in limb.ref_bones:
+					armature.pose.bones[bone.new_bone_name].custom_shape = obj
+					armature.pose.bones[bone.new_bone_name].custom_shape_scale = 0.25
+					armature.data.bones[bone.new_bone_name].show_wire = True
 
 				for bone in limb.ref_bones:
 					armature.data.bones[bone.new_bone_name].hide_select = True

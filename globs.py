@@ -158,6 +158,13 @@ def cb_active_AutoRefSpace(self, context):
 			new_.parent = armature.data.edit_bones[bone.name]
 		bpy.ops.object.mode_set(mode='POSE')
 
+		# Setting shape
+		obj = get_wgt_obj()
+		for bone in limb.ref_bones:
+			armature.pose.bones[bone.new_bone_name].custom_shape = obj
+			armature.pose.bones[bone.new_bone_name].custom_shape_scale = 0.25
+			armature.data.bones[bone.new_bone_name].show_wire = True
+
 		for bone in limb.ref_bones:
 			armature.data.bones[bone.new_bone_name].hide_select = True
 			armature.data.bones[bone.new_bone_name].hide = True

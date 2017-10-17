@@ -176,3 +176,35 @@ def limb_check(limb_):
 	empty_bone, empty_refs, own_ref = checks(limb_)
 	duplicate = check_single_duplicate(limb_)
 	return empty_bone or empty_refs or own_ref or duplicate
+
+def get_wgt_obj():
+	if "WGT_juar_ref" in bpy.data.objects:
+		return bpy.data.objects["WGT_juar_ref"]
+	else:
+		verts = [   Vector((0.0,0.0,0.0)),
+            Vector((1.0,0.0,0.0)),
+            Vector((0.0,1.0,0.0)),
+            Vector((0.0,0.0,1.0)),
+            Vector((-1.0,0.0,0.0)),
+            Vector((0.0,-1.0,0.0)),
+            Vector((0.0,0.0,-1.0))
+        	]
+
+	edges = [
+	            [0,1],
+	            [0,2],
+	            [0,3],
+	            [0,4],
+	            [0,5],
+	            [0,6]
+	        ]
+
+	faces = []
+
+	mesh = bpy.data.meshes.new(name="WGT_juar_ref")
+	mesh.from_pydata(verts, edges, faces)
+
+	obj = bpy.data.objects.new("WGT_juar_ref", mesh)
+	bpy.context.scene.objects.link(obj)
+	
+	return obj
