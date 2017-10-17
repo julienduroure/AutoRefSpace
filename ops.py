@@ -338,6 +338,14 @@ class POSE_OT_juar_update_refspace(bpy.types.Operator):
 		if "WGT_juar_ref" in  bpy.data.objects:
 			bpy.data.objects.remove(bpy.data.objects["WGT_juar_ref"], do_unlink=True)
 
+			bpy.utils.unregister_class(getattr(bpy.types, "POSE_PT_JuAR_AutoRefSpace_" + context.active_object.data.get('autorefspace_rig_id')))
+
+			if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py" in bpy.data.texts.keys():
+				bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_drivers.py"], do_unlink=True)
+
+			if context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py" in bpy.data.texts.keys():
+				bpy.data.texts.remove(bpy.data.texts[context.active_object.data["autorefspace_rig_id"] + "_autorefspace_ui.py"], do_unlink=True)
+
 		return {'FINISHED'}
 
 
