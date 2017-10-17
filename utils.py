@@ -26,6 +26,8 @@ import bpy
 
 from .globs import *
 
+from mathutils import Vector
+
 #shortcut to prefs
 def addonpref():
 	user_preferences = bpy.context.user_preferences
@@ -206,5 +208,5 @@ def get_wgt_obj():
 
 	obj = bpy.data.objects.new("WGT_juar_ref", mesh)
 	bpy.context.scene.objects.link(obj)
-	
+
 	return obj
