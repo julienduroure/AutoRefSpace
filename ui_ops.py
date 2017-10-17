@@ -101,7 +101,10 @@ class POSE_OT_juar_limb_add(bpy.types.Operator):
 			init_sides(context)
 
 		limb = armature.juar_limbs.add()
-		limb.name = ("Limb.%d" + get_side(context.active_pose_bone.name)) % len(armature.juar_limbs)
+		if context.active_pose_bone:
+			limb.name = ("Limb.%d" + get_side(context.active_pose_bone.name)) % len(armature.juar_limbs)
+		else:
+			limb.name = "Limb.%d" % len(armature.juar_limbs)
 		limb.id = uuid.uuid4().hex
 
 		armature.juar_active_limb = len(armature.juar_limbs) - 1
