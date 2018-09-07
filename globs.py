@@ -33,22 +33,6 @@ from .ui import*
 from mathutils import Vector
 from mathutils import Quaternion
 
-def update_panel(self, context):
-	bpy.utils.unregister_class(POSE_PT_juar_AutoRefSpace_Limbs)
-	bpy.utils.unregister_class(POSE_PT_juar_LimbDetail)
-	bpy.utils.unregister_class(POSE_PT_juar_LiveAutoRefSpace)
-	bpy.utils.unregister_class(POSE_PT_juar_LimbGenerate)
-
-	POSE_PT_juar_AutoRefSpace_Limbs.bl_category = addonpref().category
-	POSE_PT_juar_LimbDetail.bl_category = addonpref().category
-	POSE_PT_juar_LiveAutoRefSpace.bl_category = addonpref().category
-	POSE_PT_juar_LimbGenerate.bl_category = addonpref().category
-
-	bpy.utils.register_class(POSE_PT_juar_AutoRefSpace_Limbs)
-	bpy.utils.register_class(POSE_PT_juar_LimbDetail)
-	bpy.utils.register_class(POSE_PT_juar_LiveAutoRefSpace)
-	bpy.utils.register_class(POSE_PT_juar_LimbGenerate)
-
 def cb_enum_items(self, context):
 	items = []
 
@@ -257,6 +241,13 @@ class JuAR_Generation(bpy.types.PropertyGroup):
 	view_location = bpy.props.EnumProperty(name="View location", items=view_location_items, default="TOOLS")
 	panel_name    = bpy.props.StringProperty(name="Panel name")
 	tab_tool      = bpy.props.StringProperty(name="Tab")
+
+from .ui import *
+def update_panel(self, context):
+	unregister_panels()
+	change_panel_tab()
+	register_panels()
+
 
 def register():
 	bpy.utils.register_class(BoneItem)

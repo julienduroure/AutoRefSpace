@@ -259,8 +259,20 @@ class POSE_MT_JuAR_limb_specials(bpy.types.Menu):
 		op = layout.operator("pose.juar_limb_copy", icon='ARROW_LEFTRIGHT', text="Mirror Copy system")
 		op.mirror = True
 
+def change_panel_tab():
+	POSE_UL_juar_LimbList.bl_category = addonpref().category
+	POSE_UL_juar_BoneList.bl_category = addonpref().category
+	POSE_UL_JuAR_SideList.bl_category = addonpref().category
 
-def register():
+	POSE_PT_juar_AutoRefSpace_Limbs.bl_category = addonpref().category
+	POSE_PT_juar_LimbDetail.bl_category = addonpref().category
+	POSE_PT_juar_LiveAutoRefSpace.bl_category = addonpref().category
+	POSE_PT_juar_LimbGenerate.bl_category = addonpref().category
+
+	POSE_MT_JuAR_limb_specials.bl_category = addonpref().category
+
+
+def register_panels():
 	bpy.utils.register_class(POSE_UL_juar_LimbList)
 	bpy.utils.register_class(POSE_UL_juar_BoneList)
 	bpy.utils.register_class(POSE_UL_JuAR_SideList)
@@ -272,7 +284,12 @@ def register():
 
 	bpy.utils.register_class(POSE_MT_JuAR_limb_specials)
 
-def unregister():
+
+def register():
+	change_panel_tab()
+	register_panels()
+
+def unregister_panels():
 	bpy.utils.unregister_class(POSE_UL_juar_LimbList)
 	bpy.utils.unregister_class(POSE_UL_juar_BoneList)
 	bpy.utils.unregister_class(POSE_UL_JuAR_SideList)
@@ -283,3 +300,7 @@ def unregister():
 	bpy.utils.unregister_class(POSE_PT_juar_LimbGenerate)
 
 	bpy.utils.unregister_class(POSE_MT_JuAR_limb_specials)
+
+
+def unregister():
+	unregister_panels()
