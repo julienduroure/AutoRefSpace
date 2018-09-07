@@ -122,6 +122,9 @@ class POSE_OT_juar_limb_add(bpy.types.Operator):
 					ref.name  = bone.name
 					ref.label = bone.name
 					limb.active_ref_bone = len(limb.ref_bones) - 1
+					if len(limb.ref_bones) == 1:
+						# At creation, setting the first one as default in enum
+						ref.enum_default = True
 
 		return {'FINISHED'}
 
@@ -199,6 +202,9 @@ class POSE_OT_juar_ref_bone_add(bpy.types.Operator):
 		if context.active_pose_bone:
 			bone.name  = context.active_pose_bone.name
 			bone.label = context.active_pose_bone.name
+			if len(armature.juar_limbs[index_limb].ref_bones) == 1:
+				# At creation, the first one is default in enum
+				bone.enum_default = True
 		armature.juar_limbs[index_limb].active_ref_bone = len(armature.juar_limbs[index_limb].ref_bones) - 1
 
 		return {'FINISHED'}
@@ -247,6 +253,8 @@ class POSE_OT_juar_limb_select_bone_from_selection(bpy.types.Operator):
 					new_bone = armature.juar_limbs[armature.juar_active_limb].ref_bones.add()
 					new_bone.name = bone.name
 					new_bone.label = bone.name
+					if len(armature.juar_limbs[armature.juar_active_limb].ref_bones) == 1:
+						new_bone.enum_default = True
 					armature.juar_limbs[armature.juar_active_limb].active_ref_bone = len(armature.juar_limbs[armature.juar_active_limb].ref_bones) - 1
 
 		return {'FINISHED'}
@@ -330,6 +338,25 @@ class POSE_OT_juar_side_init(bpy.types.Operator):
 
 		return {'FINISHED'}
 
+class POSE_OT_juar_default_enum(bpy.types.Operator):
+	"""Set default enum value"""
+	bl_idname = "pose.juar_default_enum"
+	bl_label = "Set default enum value"
+	bl_options = {'REGISTER'}
+
+	idx = bpy.props.IntProperty()
+
+	@classmethod
+	def poll(self, context):
+		return True
+
+	def execute(self, context):
+		armature = context.object
+		for bone in armature.juar_limbs[armature.juar_active_limb].ref_bones:
+			bone.enum_default = False
+		armature.juar_limbs[armature.juar_active_limb].ref_bones[self.idx].enum_default = True
+		return {'FINISHED'}
+
 def register():
 
 	bpy.utils.register_class(POSE_OT_juar_limb_move)
@@ -348,6 +375,8 @@ def register():
 	bpy.utils.register_class(POSE_OT_juar_side_remove)
 	bpy.utils.register_class(POSE_OT_juar_side_init)
 
+	bpy.utils.register_class(POSE_OT_juar_default_enum)
+
 def unregister():
 
 	bpy.utils.unregister_class(POSE_OT_juar_limb_move)
@@ -365,3 +394,5 @@ def unregister():
 	bpy.utils.unregister_class(POSE_OT_juar_side_add)
 	bpy.utils.unregister_class(POSE_OT_juar_side_remove)
 	bpy.utils.unregister_class(POSE_OT_juar_side_init)
+
+	bpy.utils.unregister_class(POSE_OT_juar_default_enum)

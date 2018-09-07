@@ -54,6 +54,12 @@ class POSE_UL_juar_BoneList(bpy.types.UIList):
 
 		if self.layout_type in {'DEFAULT', 'COMPACT'}:
 			layout.prop(item, "name", text="", emboss=False)
+			if item.enum_default == True:
+				icon = 'SOLO_ON'
+			else:
+				icon = 'SOLO_OFF'
+			op = layout.operator("pose.juar_default_enum", text='', emboss=False, icon=icon)
+			op.idx = index
 
 		elif self.layout_type in {'GRID'}:
 			layout.alignment = 'CENTER'

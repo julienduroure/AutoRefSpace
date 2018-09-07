@@ -134,6 +134,12 @@ def cb_active_AutoRefSpace(self, context):
 			if bone.label == "":
 				bone.label = bone.name
 
+		#Set default enum value
+		for bone in limb.ref_bones:
+			if bone.enum_default == True:
+				limb.enum = bone.label
+				break
+
 		#Store Parent
 		bpy.ops.object.mode_set(mode='EDIT')
 		if armature.data.edit_bones[limb.bone].parent:
@@ -222,6 +228,7 @@ class BoneItem(bpy.types.PropertyGroup):
 	label = bpy.props.StringProperty(name="Label")
 	constraint = bpy.props.StringProperty(name="Label")
 	new_bone_name = bpy.props.StringProperty(name="New bone name")
+	enum_default = bpy.props.BoolProperty(name="Default Enum", default=False)
 
 class LimbItem(bpy.types.PropertyGroup):
 

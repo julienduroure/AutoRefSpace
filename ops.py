@@ -265,14 +265,10 @@ class POSE_OT_juar_generate_refspace(bpy.types.Operator):
 			if limb.generated == True:
 				continue
 			#Set default value
-			armature.data.bones.active = armature.data.bones[limb.bone]
-			if limb.ref_bones[limb.active_ref_bone].label != "":
-				armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[limb.active_ref_bone].label
-			else:
-				for i in range(len(limb.ref_bones)):
-					if limb.ref_bones[i].label != "":
-						armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[i].label
-						break
+			for idx, bone in enumerate(limb.ref_bones):
+				if bone.enum_default == True:
+					armature.pose.bones[limb.bone].autorefspace_enum = limb.ref_bones[idx].label
+					break
 
 			#Set generate flag
 			limb.generated = True
