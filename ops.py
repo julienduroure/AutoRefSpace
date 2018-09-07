@@ -293,7 +293,6 @@ class POSE_OT_juar_update_refspace(bpy.types.Operator):
 	def execute(self, context):
 		armature = context.active_object
 		limbs = armature.juar_limbs
-		limb  = limbs[armature.juar_active_limb]
 
 		for limb in limbs:
 			#Delete keyframes on bones
@@ -311,7 +310,23 @@ class POSE_OT_juar_update_refspace(bpy.types.Operator):
 				armature.data.bones[armature.pose.bones[limb.bone_target].constraints.get(bone.constraint).subtarget].driver_remove('hide')
 				armature.data.bones[armature.pose.bones[limb.bone_target].constraints.get(bone.constraint).subtarget].driver_remove('hide_select')
 
-			#This will delete constraints
+			#Reset parent of bone
+			bpy.ops.object.mode_set(mode='EDIT')
+			if limb.parent != "":
+				armature.data.edit_bones[limb.bone].parent = armature.data.edit_bones[limb.parent]
+			else:
+				armature.data.edit_bones[limb.bone].parent = None
+			limb.parent = ""
+			bpy.ops.object.mode_set(mode='POSE')
+
+			# delete bones
+			bpy.ops.object.mode_set(mode='EDIT')
+			for bone in limb.ref_bones:
+				armature.data.edit_bones.remove(armature.data.edit_bones[bone.new_bone_name])
+				bone.new_bone_name = ""
+			armature.data.edit_bones.remove(armature.data.edit_bones[limb.bone_target])
+			bpy.ops.object.mode_set(mode='POSE')
+
 			limb.active = False
 
 			if bpy.context.active_object.animation_data and bpy.context.active_object.animation_data.action:
