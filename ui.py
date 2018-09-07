@@ -219,11 +219,11 @@ class POSE_PT_juar_LimbGenerate(bpy.types.Panel):
 
 		row = layout.row()
 		row.prop(armature.juar_generation, "view_location")
-		row = layout.row()
-		row.prop(armature.juar_generation, "panel_name")
 		if armature.juar_generation.view_location == "TOOLS":
 			row = layout.row()
 			row.prop(armature.juar_generation, "tab_tool")
+		row = layout.row()
+		row.prop(armature.juar_generation, "panel_name")
 		row = layout.row()
 		row.operator("pose.juar_generate_refspace", text="Generate")
 		if duplicate == True or some_empty_bone == True or some_empty_refs == True or some_own_ref == True:
