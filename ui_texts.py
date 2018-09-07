@@ -66,6 +66,7 @@ def cb_enum_items(self, context):
 ###ITEMS_UPDATE_CB_LIST###
 
 bpy.types.PoseBone.autorefspace_enum = bpy.props.EnumProperty(name = 'enum', items=cb_enum_items, update=cb_item_change)
+bpy.types.Scene.juar_display_all = bpy.props.BoolProperty()
 
 class POSE_PT_JuAR_AutoRefSpace_###rig_id###(bpy.types.Panel):
 	bl_label = "###LABEL###"
@@ -81,14 +82,18 @@ class POSE_PT_JuAR_AutoRefSpace_###rig_id###(bpy.types.Panel):
 	def draw(self, context):
 		layout = self.layout
 		armature = context.object
+		scene = context.scene
 
 		refspace_tab = ###REFSPACE_TAB###
 		enum_name = {
 ###ENUM_LABELS###
 		}
 
+		row = layout.row()
+		row.prop(scene, "juar_display_all", text="Display All References")
+
 		for bone in refspace_tab:
-			if bone in [b.name for b in context.selected_pose_bones]:
+			if scene.juar_display_all == True or bone in [b.name for b in context.selected_pose_bones]:
 				row = layout.row()
 				row.prop(armature.pose.bones[bone], "autorefspace_enum", text=enum_name[bone])
 
